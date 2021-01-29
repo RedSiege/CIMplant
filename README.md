@@ -20,11 +20,11 @@ CIMplant.exe -s [remote IP address] -u [username] -d [domain] -p [password] -c c
 ```
 ### Some Helpful Commands
 
-![image](https://github.com/FortyNorthSecurity/CIMplant/raw/master/Extras/CIMplant-Help.gif)
+![image](https://github.com/FortyNorthSecurity/CIMplant/raw/main/Extras/CIMplant-Help.gif)
 
 ### Some Example Usage Commands
 
-![image](https://github.com/FortyNorthSecurity/CIMplant/raw/master/Extras/CIMplant-Usage.gif)
+![image](https://github.com/FortyNorthSecurity/CIMplant/raw/main/Extras/CIMplant-Usage.gif)
 
 ## Important Files
 
