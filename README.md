@@ -8,6 +8,13 @@ Note: Some commands will use PowerShell in combination with WMI, denoted with **
 
 CIMplant is a C# rewrite and expansion on [@christruncer](https://twitter.com/christruncer)'s [WMImplant](https://github.com/FortyNorthSecurity/WMImplant). It allows you to gather data about a remote system, execute commands, exfil data, and more. The tool allows connections using Windows Management Instrumentation, [WMI](https://docs.microsoft.com/en-us/windows/win32/wmisdk/about-wmi), or Common Interface Model, [CIM](https://www.dmtf.org/standards/cim) ; well more accurately Windows Management Infrastructure, [MI](https://docs.microsoft.com/en-us/previous-versions/windows/desktop/wmi_v2/windows-management-infrastructure). CIMplant requires local administrator permissions on the target system.
 
+## Setup:
+
+It's probably easiest to use the built version under Releases, just note that it is compiled in Debug mode. If you want to build the solution yourself, follow the steps below.
+
+1. Load CIMplant.sln into Visual Studio
+2. Go to Build at the top and then Build Solution if no modifications are wanted
+
 ## Usage
 
 ```
