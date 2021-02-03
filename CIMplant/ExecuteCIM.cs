@@ -888,7 +888,6 @@ namespace Execute
                     }
                     else
                     {
-                        Console.WriteLine("invoking");
                         powershell.Invoke();
                     }
                 }

@@ -65,23 +65,23 @@ namespace CIMplant
             //Creates the command dictionary - {header:commands}
             Dictionary<string, string[]> commandDict = new Dictionary<string, string[]>
             {
-                {"File Operations", new string[] { "cat - Reads the contents of a file",
+                {"File Operations", new string[] { "cat** - Reads the contents of a file",
                         "copy - Copies a file from one location to another",
-                        "download - Download a file from the targeted machine",
+                        "download** - Download a file from the targeted machine",
                         "ls - File/Directory listing of a specific directory",
                         "search - Search for a file on a user-specified drive",
-                        "upload - Upload a file to the targeted machine"
+                        "upload** - Upload a file to the targeted machine"
                     }
                 },
                 {"Lateral Movement Facilitation", new string[] {"command_exec - Run a command line command and receive the output",
                         "disable_wdigest - Sets the registry value for UseLogonCredential to zero",
                         "enable_wdigest - Adds registry value UseLogonCredential",
-                        "disable_winrm - Disables WinRM on the targeted system",
-                        "enable_winrm - Enables WinRM on the targeted system",
+                        "disable_winrm** - Disables WinRM on the targeted system",
+                        "enable_winrm** - Enables WinRM on the targeted system",
                         "reg_mod - Modify the registry on the targeted machine",
                         "reg_create - Create the registry value on the targeted machine",
                         "reg_delete - Delete the registry on the targeted machine",
-                        "remote_posh - Run a PowerShell script on a remote machine and receive the output",
+                        "remote_posh** - Run a PowerShell script on a remote machine and receive the output",
                         "sched_job - Not implimented due to the Win32_ScheduledJobs accessing an outdated API",
                         "service_mod - Create, delete, or modify system services"
                     }
@@ -135,6 +135,8 @@ namespace CIMplant
                         Console.WriteLine("{0,-30}{1,-50}", commandSplit[0], commandSplit[1].TrimStart());
                     }
                 }
+
+                Console.WriteLine("\n** Denotes PowerShell usage (either using a PowerShell Runspace or Win32_Process::Create method)");
             }
 
             else
@@ -162,6 +164,8 @@ namespace CIMplant
                         Console.WriteLine("{0,-30}{1,-50}", commandSplit[0], commandSplit[1].TrimStart());
                     }
                 }
+
+                Console.WriteLine("\n** Denotes PowerShell usage (either using a PowerShell Runspace or Win32_Process::Create method)");
             }
 
             Environment.Exit(0);
