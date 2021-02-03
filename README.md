@@ -33,6 +33,12 @@ CIMplant.exe -s [remote IP address] -u [username] -d [domain] -p [password] -c c
 
 ![image](https://github.com/FortyNorthSecurity/CIMplant/raw/main/Extras/CIMplant-Usage.gif)
 
+### Cobalt Strike Execute-Assembly
+
+I wanted to code CIMplant in a way that would allow usage through execute-assembly so everything is packed into one executable and loaded reflectively. You should be able to run all commands through beacon without issue. Enjoy!
+
+![image](https://github.com/FortyNorthSecurity/CIMplant/raw/main/Extras/CIMplant-CS-Usage.gif)
+
 ## Important Files
 
 1. Program.cs
