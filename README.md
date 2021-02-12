@@ -1,3 +1,7 @@
+<p align="center">
+  <img width="360" height="360" src="https://github.com/FortyNorthSecurity/CIMplant/raw/main/Extras/cimplant_logo_letters.png">
+</p>
+
 # CIMplant
 
 C# port of WMImplant which uses either CIM or WMI to query remote systems. It can use provided credentials or the current user's session.
