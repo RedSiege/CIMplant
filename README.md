@@ -1,5 +1,5 @@
 <p align="center">
-  <img width="360" height="360" src="https://github.com/FortyNorthSecurity/CIMplant/raw/main/Extras/cimplant_logo_letters.png">
+  <img width="360" height="340" src="https://github.com/FortyNorthSecurity/CIMplant/raw/main/Extras/cimplant_logo_letters.png">
 </p>
 
 # CIMplant
