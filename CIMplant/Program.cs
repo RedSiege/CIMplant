@@ -165,6 +165,14 @@ namespace CIMplant
             [Option("show-examples", Group = "Command", Required = true,
                 HelpText = "Displays examples for all available commands")]
             public bool ShowExamples { get; set; }
+
+            [Option("no-banner", Group = "Command", Required = false,
+                HelpText = "Disables that gorgeous ASCII art (probably should never use this)")]
+            public bool NoBanner { get; set; }
+
+            [Option("test", Group = "Command", Required = false,
+                HelpText = "Tests all commands with a specified username/password/system (or against the localhost)")]
+            public bool Test { get; set; }
         }
 
         private static void DisplayHelp<T>(ParserResult<T> result, IEnumerable<Error> errs)
@@ -172,13 +180,59 @@ namespace CIMplant
             HelpText helpText = HelpText.AutoBuild(result, h =>
             {
                 h.AdditionalNewLineAfterOption = false;
-                h.Heading = "WMI C# Version 1.0"; //change header
+                h.Heading = "WMI C# Version 0.1"; //change header
                 h.Copyright = ""; //change copyright text
                 h.AutoVersion = false;
                 return HelpText.DefaultParsingErrorsHandler(result, h);
             }, e => e);
             Console.WriteLine(helpText);
             System.Environment.Exit(1);
+        }
+
+        private static void RunTestCases(Options options)
+        {
+            Commander commander = new Commander();
+            var connector = new Connector();
+            var planter = new Planter(commander, connector);
+            planter.Connector = new Connector(options.Wmi, planter);
+
+            try
+            {
+                
+                foreach (var command in CommandArray)
+                {
+                    commander = command == null ? new Commander() : new Commander(command);
+
+                    if (commander.Method == null)
+                        commander.Method = commander.Command;
+
+                    if (planter.Commander.Command != null)
+                        Messenger.GoodMessage("[+] Results from " + planter.Commander.Command + ":\n");
+
+                    object result = null;
+
+                    // Block to set the specific Type for WMI/CIM command
+                    Type type = options.Wmi ? typeof(ExecuteWmi) : typeof(ExecuteCim);
+                    MethodInfo method = type.GetMethod((planter.Commander.Method ?? planter.Commander.Command) ?? string.Empty);
+
+                    // Create an instance of the type
+                    object instance = Activator.CreateInstance(type);
+
+                    // Create parameter object
+                    object[] stringMethodParams = { planter };
+
+                    result = method.Invoke(instance, stringMethodParams);
+
+
+
+                }
+            }
+
+            catch (Exception e)
+            {
+                ExceptionLogging.SendErrorToText(e);
+
+            }
         }
 
         private static void Main(string[] args)
@@ -210,6 +264,13 @@ namespace CIMplant
             if (options.ShowExamples)
                 Messenger.GetExamples();
 
+            if (options.Test)
+            {
+                RunTestCases(options);
+                Console.WriteLine("Test cases completed");
+                System.Environment.Exit(0);
+            }
+
             //Need a separate namespace for certain commands that deal with registry get/set
             //if (options.Command.ToLower() == "disable_wdigest")
             //{
@@ -222,7 +283,7 @@ namespace CIMplant
             // Block to instantiate the Commander class (houses all command information and checks for required vals)
             //////////
             Commander commander = new Commander();
-            if ((options.Command != null && CommandArray.Any(options.Command.ToLower().Contains)) || options.Reset)
+            if (options.Command != null && CommandArray.Any(options.Command.ToLower().Contains) || options.Reset)
             {
                 try
                 {
@@ -276,8 +337,8 @@ namespace CIMplant
             //////////
             // Block to instantiate the Planter class (houses all info about the target system)
             //////////
-            Connector connector = new Connector();
-            Planter planter = new Planter(commander, connector);
+            var connector = new Connector();
+            var planter = new Planter(commander, connector);
 
             //////////
             // Block to create the connection to either WMI or CIM and fallback to the other
@@ -404,6 +465,7 @@ namespace CIMplant
             if (planter.Commander.Command != null)
                 Messenger.GoodMessage("[+] Results from " + planter.Commander.Command + ":\n");
 
+
             ////////
             // Reflection Block
             ////////
@@ -492,11 +554,9 @@ namespace CIMplant
                 Console.WriteLine(e);
             }
 
-
             ////////
             // End Reflection Block
             ////////
-
 
             if (result == null)
             {
