@@ -63,4 +63,4 @@ Of course, the first thing we'll want to be aware of is the initial WMI or CIM c
 
 Next, you'll want to look at the Microsoft-Windows-WMI-Activity/Trace event log in the Event Viewer. Search for **Event ID 11** and filter on the IsLocal property if possible. You can also look for **Event ID 1295** within the Microsoft-Windows-WinRM/Analytic log.
 
-Finally, you'll want to look for any modifications to the **DebugFilePath** property with the **Win32_OSRecoveryConfiguration** class. More detailed information about detection can be found at Part 1 of our blog series here: [CIMplant Part 1: Detection of a C# Implementation of WMImplant](fortynorthsecurity.com/blog/cimplant-part-1-detections/)
+Finally, you'll want to look for any modifications to the **DebugFilePath** property with the **Win32_OSRecoveryConfiguration** class. More detailed information about detection can be found at Part 1 of our blog series here: [CIMplant Part 1: Detection of a C# Implementation of WMImplant](https://fortynorthsecurity.com/blog/cimplant-part-1-detections/)
