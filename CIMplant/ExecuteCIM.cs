@@ -274,122 +274,31 @@ namespace Execute
 
         ///////////////////////////////////////           FILE OPERATIONS            /////////////////////////////////////////////////////////////////////
 
-        // WORKING CURRENTLY BUT WITH POWERSHELL :(//
         public object cat(Planter planter)
         {
+            // Modified cat method from https://github.com/kyleavery/WMIEnum/blob/656666d00f6fd6fdfb67f398d83f27b6e28db7bf/WMIEnum/Program.cs#L186
+            // Thanks to https://twitter.com/kyleavery_
+
             CimSession cimSession = planter.Connector.ConnectedCimSession;
             string path = planter.Commander.File;
-            string originalWmiProperty;
 
-            //if (!CheckForFile(path, cimSession, verbose: true))
-            //{
-            //    return null;
-            //}
-
-            try
+            // Check for file first
+            if (!CheckForFile(path, cimSession, verbose: false))
             {
-                // We may need to do this same thing throughout if there are issues in the future
-                originalWmiProperty = GetOsRecovery(cimSession);
+                Console.WriteLine("Remote file does not exist, please specify a file present on the system");
+                return null;
             }
-            catch (RektDebugFilePath e)
-            {
-                throw new RektDebugFilePath(e.Message);
-            }
-
-            bool wsman = true;
 
             Messenger.GoodMessage("[+] Printing file: " + path);
             Messenger.GoodMessage("--------------------------------------------------------\n");
 
-            if (wsman == true)
-            {
-                // We can modify this later easily to pass wsman if needed
-                using (PowerShell powershell = PowerShell.Create())
-                {
-                    try
-                    {
-                        if (!string.IsNullOrEmpty(planter.Password?.ToString()))
-                            powershell.Runspace = RunspaceCreate(planter);
-                        else
-                        {
-                            // Since we can't run a local runspace as admin let's just grab the file using normal c# code (pro: avoids PS)
-                            //powershell.Runspace = RunspaceCreateLocal();
-                            // We might need to catch if people try to cat binary files in the future
-                            Console.WriteLine(System.IO.File.ReadAllText(path));
-                            return true;
-                        }
-                    }
-                    catch (PSRemotingTransportException)
-                    {
-                        wsman = false;
-                    }
-                    catch (UnauthorizedAccessException)
-                    {
-                        Messenger.ErrorMessage("[-] Error: Access to the file is denied. If running against the local system use Admin prompt.");
-                        return null;
-                    }
+            // https://twitter.com/mattifestation/status/1220713684756049921
+            CimInstance baseInstance = new CimInstance("PS_ModuleFile");
+            baseInstance.CimInstanceProperties.Add(CimProperty.Create("InstanceID", path, CimFlags.Key));
+            CimInstance modifiedInstance = cimSession.GetInstance("ROOT/Microsoft/Windows/Powershellv3", baseInstance);
 
-                    if (powershell.Runspace.ConnectionInfo != null)
-                    {
-                        string command1 = "$data = (Get-Content " + path + " | Out-String).Trim()";
-                        const string command2 = @"$encdata = [Int[]][Char[]]$data -Join ','";
-                        const string command3 =
-                            @"$a = Get-WmiObject -Class Win32_OSRecoveryConfiguration; $a.DebugFilePath = $encdata; $a.Put()";
-
-                        powershell.Commands.AddScript(command1, false);
-                        powershell.Commands.AddScript(command2, false);
-                        powershell.Commands.AddScript(command3, false);
-                        Collection<PSObject> result = powershell.Invoke();
-                    }
-                    else
-                        wsman = false;
-                }
-            }
-
-            if (wsman == false)
-            {
-                // WSMAN not enabled on the remote system, use another method
-
-                // Create the parameters and create the new process. Broken out to make it easier to follow what's up
-                CimMethodParametersCollection cimParams = new CimMethodParametersCollection();
-                string encodedCommand = "$data = (Get-Content " + path +
-                                        " | Out-String).Trim(); $encdata = [Int[]][Char[]]$data -Join ','; $a = Get-WmiObject -Class Win32_OSRecoveryConfiguration; $a.DebugFilePath = $encdata; $a.Put()";
-
-                string encodedCommandB64 = Convert.ToBase64String(Encoding.Unicode.GetBytes(encodedCommand));
-                string fullCommand = "powershell -enc " + encodedCommandB64;
-                
-                cimParams.Add(CimMethodParameter.Create("CommandLine", fullCommand, CimFlags.In));
-
-                // We only need the first instance
-                cimSession.InvokeMethod(new CimInstance("Win32_Process", Namespace), "Create", cimParams);
-            }
-
-            // Give it a second to write and check for changes to DebugFilePath
-            Thread.Sleep(1000);
-            //CheckForFinishedDebugFilePath(originalWmiProperty, cimSession);
-
-            //Get the contents of the file in the DebugFilePath prop
-            string[] fileOutput = GetOsRecovery(cimSession).Split(',');
-
-            StringBuilder output = new StringBuilder();
-
-            //Print file output.
-            foreach (string integer in fileOutput)
-            {
-                var a = (char) Convert.ToInt32(integer);
-                output.Append(a);
-            }
-
-            Console.WriteLine(output);
-            try
-            {
-                SetOsRecovery(cimSession, originalWmiProperty);
-            }
-            catch (RektDebugFilePath e)
-            {
-                //Console.WriteLine(e);
-                throw new RektDebugFilePath(e.Message);
-            }
+            System.Byte[] fileBytes = (byte[])modifiedInstance.CimInstanceProperties["FileData"].Value;
+            Console.WriteLine(Encoding.UTF8.GetString(fileBytes, 0, fileBytes.Length));
             return true;
         }
 

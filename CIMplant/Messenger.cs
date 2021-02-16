@@ -65,7 +65,7 @@ namespace CIMplant
             //Creates the command dictionary - {header:commands}
             Dictionary<string, string[]> commandDict = new Dictionary<string, string[]>
             {
-                {"File Operations", new string[] { "cat** - Reads the contents of a file",
+                {"File Operations", new string[] { "cat - Reads the contents of a file",
                         "copy - Copies a file from one location to another",
                         "download** - Download a file from the targeted machine",
                         "ls - File/Directory listing of a specific directory",
