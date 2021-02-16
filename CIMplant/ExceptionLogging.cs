@@ -11,16 +11,16 @@ namespace CIMplant
     public static class ExceptionLogging
     {
 
-        private static string ErrorlineNo, Errormsg, extype, exurl, hostIp, ErrorLocation, HostAdd;
+        private static string _errorlineNo, _errormsg, _extype, _exurl, _hostIp, _errorLocation;
 
         public static void SendErrorToText(Exception ex)
         {
             var line = Environment.NewLine + Environment.NewLine;
 
-            ErrorlineNo = ex.StackTrace.Substring(ex.StackTrace.Length - 7, 7);
-            Errormsg = ex.GetType().Name;
-            extype = ex.GetType().ToString();
-            ErrorLocation = ex.Message;
+            _errorlineNo = ex.StackTrace.Substring(ex.StackTrace.Length - 7, 7);
+            _errormsg = ex.GetType().Name;
+            _extype = ex.GetType().ToString();
+            _errorLocation = ex.Message;
 
             try
             {
@@ -36,7 +36,7 @@ namespace CIMplant
 
                 using (StreamWriter sw = File.AppendText(filepath))
                 {
-                    string error = "Log Written Date:" + " " + DateTime.Now.ToString(CultureInfo.InvariantCulture) + line + "Error Line No :" + " " + ErrorlineNo + line + "Error Message:" + " " + Errormsg + line + "Exception Type:" + " " + extype + line + "Error Location :" + " " + ErrorLocation + line + " Error Page Url:" + " " + exurl + line + "User Host IP:" + " " + hostIp + line;
+                    string error = "Log Written Date:" + " " + DateTime.Now.ToString(CultureInfo.InvariantCulture) + line + "Error Line No :" + " " + _errorlineNo + line + "Error Message:" + " " + _errormsg + line + "Exception Type:" + " " + _extype + line + "Error Location :" + " " + _errorLocation + line + " Error Page Url:" + " " + _exurl + line + "User Host IP:" + " " + _hostIp + line;
                     sw.WriteLine("-----------Exception Details on " + " " + DateTime.Now.ToString(CultureInfo.InvariantCulture) + "-----------------");
                     sw.WriteLine("-------------------------------------------------------------------------------------");
                     sw.WriteLine(line);

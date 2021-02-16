@@ -167,7 +167,7 @@ namespace CIMplant
             public bool ShowExamples { get; set; }
 
             [Option("no-banner", Group = "Command", Required = false,
-                HelpText = "Disables that gorgeous ASCII art (probably should never use this)")]
+                HelpText = "Disables that gorgeous ASCII art (probably should never use this)", Default = false)]
             public bool NoBanner { get; set; }
 
             [Option("test", Group = "Command", Required = false,
@@ -198,7 +198,6 @@ namespace CIMplant
 
             try
             {
-                
                 foreach (var command in CommandArray)
                 {
                     commander = command == null ? new Commander() : new Commander(command);
@@ -222,22 +221,17 @@ namespace CIMplant
                     object[] stringMethodParams = { planter };
 
                     result = method.Invoke(instance, stringMethodParams);
-
-
-
                 }
             }
 
             catch (Exception e)
             {
                 ExceptionLogging.SendErrorToText(e);
-
             }
         }
 
         private static void Main(string[] args)
         {
-            Messenger.ImportantAsciiArt();
             Stopwatch watch = new Stopwatch();
             watch.Start();
 
@@ -257,6 +251,9 @@ namespace CIMplant
             Options options = Options.Instance;
             Console.WriteLine();
 
+            if (!options.NoBanner)
+                Messenger.ImportantAsciiArt();
+
             // Print all commands before doing anything if that's what the user wants
             if (options.ShowCommands)
                 Messenger.GetCommands();
@@ -266,18 +263,11 @@ namespace CIMplant
 
             if (options.Test)
             {
-                RunTestCases(options);
-                Console.WriteLine("Test cases completed");
+                Console.WriteLine("Test method not currently supported");
+                //RunTestCases(options);
+                //Console.WriteLine("Test cases completed");
                 System.Environment.Exit(0);
             }
-
-            //Need a separate namespace for certain commands that deal with registry get/set
-            //if (options.Command.ToLower() == "disable_wdigest")
-            //{
-            //    //Console.WriteLine("New namespace due to command");
-            //    NameSpace = @"stdRegProv";
-            //}
-
 
             //////////
             // Block to instantiate the Commander class (houses all command information and checks for required vals)
