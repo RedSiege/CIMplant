@@ -1,6 +1,4 @@
-﻿using CIMplant;
-using Microsoft.Management.Infrastructure;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
@@ -12,15 +10,14 @@ using System.Management.Automation.Remoting;
 using System.Management.Automation.Runspaces;
 using System.Net;
 using System.Reflection;
-using System.Runtime.InteropServices.WindowsRuntime;
 using System.Security;
-using System.Security.Principal;
 using System.Text;
 using System.Text.RegularExpressions;
-using Microsoft.Management.Infrastructure.Options;
 using System.Threading;
+using Microsoft.Management.Infrastructure;
+using Microsoft.Management.Infrastructure.Options;
 
-namespace Execute
+namespace CIMplant
 {
     public class ExecuteCim
     {
@@ -356,8 +353,13 @@ namespace Execute
             string originalWmiProperty = GetOsRecovery(cimSession);
             bool wsman = true;
             bool resetEnvSize = false;
-            int envSize = 500;
+            string originalRemoteEnvSize = EnvelopeSize.GetMaxEnvelopeSize(cimSession);
+            string originalLocalEnvSize = EnvelopeSize.GetLocalMaxEnvelopeSize();
 
+            // Get the local maxEnvelopeSize. If it's not set (default) let's note that
+            originalRemoteEnvSize = originalRemoteEnvSize == "0" ? "500" : originalRemoteEnvSize;
+            originalLocalEnvSize = originalLocalEnvSize == "0" ? "500" : originalLocalEnvSize;
+            
             Messenger.GoodMessage("[+] Downloading file: " + downloadPath + "\n");
 
             if (wsman == true)
@@ -369,17 +371,14 @@ namespace Execute
                 {
                     try
                     {
-                        if (!string.IsNullOrEmpty(planter.Password?.ToString()))
-                            powershell.Runspace = RunspaceCreate(planter);
-                        else
-                            powershell.Runspace = RunspaceCreateLocal();
+                        powershell.Runspace = !string.IsNullOrEmpty(planter.Password?.ToString()) ? RunspaceCreate(planter) : RunspaceCreateLocal();
 
                         if (fileSize / 1024 > 450)
                         {
                             resetEnvSize = true;
                             Messenger.WarningMessage(
                                 "[*] Warning: The file size is greater than 450 KB, setting the maxEnvelopeSizeKB higher...");
-                            envSize = fileSize / 1024 > 250000 ? 999999999 : 256000;
+                            int envSize = fileSize / 1024 > 250000 ? 999999999 : 256000;
                             EnvelopeSize.SetLocalMaxEnvelopeSize(envSize);
                             EnvelopeSize.SetMaxEnvelopeSize(envSize.ToString(), cimSession);
                         }
@@ -419,7 +418,7 @@ namespace Execute
                 if (fileSize / 1024 > 450)
                 {
                     resetEnvSize = true;
-                    envSize = fileSize / 1024 > 250000 ? 999999999 : 256000;
+                    int envSize = fileSize / 1024 > 250000 ? 999999999 : 256000;
                     Messenger.WarningMessage(
                         "[*] Warning: The file size is greater than 450 KB, setting the maxEnvelopeSizeKB higher...");
                     if (fileSize / 1024 > 250000)
@@ -488,8 +487,8 @@ namespace Execute
             if (resetEnvSize)
             {
                 // Set the maxEnvelopeSizeKB back to the default val if we set it previously
-                EnvelopeSize.SetLocalMaxEnvelopeSize(500);
-                EnvelopeSize.SetMaxEnvelopeSize("500", cimSession);
+                EnvelopeSize.SetLocalMaxEnvelopeSize(Convert.ToInt32(originalLocalEnvSize));
+                EnvelopeSize.SetMaxEnvelopeSize(originalRemoteEnvSize, cimSession);
             }
 
             return true;

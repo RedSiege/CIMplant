@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Management;
 using System.Reflection;
-using CIMplant;
 using Microsoft.Management.Infrastructure;
 
-namespace Execute
+namespace CIMplant
 {
     public class RegistryMod
     {

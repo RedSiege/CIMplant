@@ -1,22 +1,20 @@
 ﻿using System;
-using CIMplant;
 using Microsoft.Management.Infrastructure;
 using Microsoft.Win32;
 
-namespace Execute
+namespace CIMplant
 {
     public class EnvelopeSize
     {
-        public static void GetLocalMaxEnvelopeSize(int envelopeSize)
+        // Let's get the maxEnvelopeSize if it's set something other than default
+        public static string GetLocalMaxEnvelopeSize()
         {
-            Messenger.WarningMessage("[*] Setting the MaxEnvelopeSizeKB on the local system to " + envelopeSize);
-
+            //Messenger.WarningMessage("[*] Getting the MaxEnvelopeSizeKB on the local system to reset later");
             try
             {
-                using (RegistryKey key =
-                    Registry.CurrentUser.CreateSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\WSMAN\Client"))
+                using (RegistryKey key = Registry.CurrentUser.OpenSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\WSMAN\Client"))
                 {
-                    key.SetValue("maxEnvelopeSize", Convert.ToUInt32(envelopeSize), RegistryValueKind.DWord);
+                    return key.GetValue("maxEnvelopeSize").ToString();
                 }
             }
             catch (Exception e)
@@ -24,23 +22,22 @@ namespace Execute
                 Messenger.ErrorMessage(
                     $"[-] Error: Unable to create local runspace to change maxEnvelopeSizeKB.\n");
                 Console.WriteLine(e);
+                return "0";
             }
         }
 
-        public static void GetMaxEnvelopeSize(string envelopeSize, CimSession cimSession)
+        public static string GetMaxEnvelopeSize(CimSession cimSession)
         {
-            Messenger.WarningMessage("[*] Setting the MaxEnvelopeSizeKB on the remote system to " + envelopeSize);
-
-            CimMethodResult result = RegistryMod.SetRegistryCim(regMethod: "SetDWORDValue", defKey: 0x80000002,
+            CimMethodResult result = RegistryMod.CheckRegistryCim(regMethod: "GetDWORDValue", defKey: 0x80000002,
                 regSubKey: @"SOFTWARE\Microsoft\Windows\CurrentVersion\WSMAN\Client",
-                regSubKeyValue: "maxEnvelopeSize", data: envelopeSize, cimSession);
+                regSubKeyValue: "maxEnvelopeSize", cimSession);
             if (Convert.ToUInt32(result.ReturnValue.Value.ToString()) == 0)
             {
+                return result.OutParameters["uValue"].Value.ToString();
             }
-            else
-            {
-                Console.WriteLine("Issues setting maxEnvelopeSize");
-            }
+
+            Console.WriteLine("Issues getting maxEnvelopeSize");
+            return "0";
         }
 
         public static void SetLocalMaxEnvelopeSize(int envelopeSize)
