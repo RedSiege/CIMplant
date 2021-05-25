@@ -1,5 +1,4 @@
-﻿using CIMplant;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
@@ -15,7 +14,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 
-namespace Execute
+namespace CIMplant
 {
     public class GetMethods
     {
@@ -949,12 +948,8 @@ namespace Execute
                 Scope = scope
             };
 
-            ManagementBaseObject inParams = mc.GetMethodParameters("GetDWORDValue");
-            inParams["hDefKey"] = 0x80000002; // HKEY_LOCAL_MACHINE
-            inParams["sSubKeyName"] = "SYSTEM\\CurrentControlSet\\Control\\SecurityProviders\\WDigest";
-            inParams["sValueName"] = "UseLogonCredential";
-
-            ManagementBaseObject outParams = mc.InvokeMethod("GetDWORDValue", inParams, null);
+            ManagementBaseObject outParams = RegistryMod.CheckRegistryWmi("GetDWORDValue", 0x80000002,
+                "SYSTEM\\CurrentControlSet\\Control\\SecurityProviders\\WDigest", "UseLogonCredential", mc);
 
             if (Convert.ToUInt32(outParams["ReturnValue"]) == 0)
             {
@@ -962,14 +957,9 @@ namespace Execute
                 if ((string) oValue != "0")
                 {
                     // wdigest is enabled, let's disable it
-
-                    ManagementBaseObject inParamsSet = mc.GetMethodParameters("SetDWORDValue");
-                    inParamsSet["hDefKey"] = 0x80000002; // HKEY_LOCAL_MACHINE
-                    inParamsSet["sSubKeyName"] = "SYSTEM\\CurrentControlSet\\Control\\SecurityProviders\\WDigest";
-                    inParamsSet["sValueName"] = "UseLogonCredential";
-                    inParamsSet["uValue"] = 0x00000000;
-
-                    ManagementBaseObject outParamsSet = mc.InvokeMethod("SetDWORDValue", inParamsSet, null);
+                    ManagementBaseObject outParamsSet = RegistryMod.SetRegistryWmi("SetDWORDValue", 0x80000002,
+                        "SYSTEM\\CurrentControlSet\\Control\\SecurityProviders\\WDigest", "UseLogonCredential", "0", mc);
+                    // 0x80000002; // HKEY_LOCAL_MACHINE
 
                     Console.WriteLine(outParamsSet != null && Convert.ToUInt32(outParamsSet["ReturnValue"]) == 0
                         ? "Successfully disabled wdigest"
@@ -996,12 +986,8 @@ namespace Execute
                 Scope = scope
             };
 
-            ManagementBaseObject inParams = mc.GetMethodParameters("GetDWORDValue");
-            inParams["hDefKey"] = 0x80000002; // HKEY_LOCAL_MACHINE
-            inParams["sSubKeyName"] = "SYSTEM\\CurrentControlSet\\Control\\SecurityProviders\\WDigest";
-            inParams["sValueName"] = "UseLogonCredential";
-
-            ManagementBaseObject outParams = mc.InvokeMethod("GetDWORDValue", inParams, null);
+            ManagementBaseObject outParams = RegistryMod.CheckRegistryWmi("GetDWORDValue", 0x80000002,
+                "SYSTEM\\CurrentControlSet\\Control\\SecurityProviders\\WDigest", "UseLogonCredential", mc);
 
             if (outParams != null && Convert.ToUInt32(outParams["ReturnValue"]) == 0)
             {
@@ -1013,14 +999,10 @@ namespace Execute
                 }
                 else
                 {
-                    //wdigest not enabled, let's enable it
-                    ManagementBaseObject inParamsSet = mc.GetMethodParameters("SetDWORDValue");
-                    inParamsSet["hDefKey"] = 0x80000002; // HKEY_LOCAL_MACHINE
-                    inParamsSet["sSubKeyName"] = "SYSTEM\\CurrentControlSet\\Control\\SecurityProviders\\WDigest";
-                    inParamsSet["sValueName"] = "UseLogonCredential";
-                    inParamsSet["uValue"] = 0x00000001;
+                    // wdigest not enabled, let's enable it
+                    ManagementBaseObject outParamsSet = RegistryMod.SetRegistryWmi("SetDWORDValue", 0x80000002,
+                        "SYSTEM\\CurrentControlSet\\Control\\SecurityProviders\\WDigest", "UseLogonCredential", "1", mc);
 
-                    ManagementBaseObject outParamsSet = mc.InvokeMethod("SetDWORDValue", inParamsSet, null);
                     Console.WriteLine(outParamsSet != null && Convert.ToUInt32(outParamsSet["ReturnValue"]) == 0
                         ? "Successfully enabled wdigest"
                         : "Error enabling wdigest");
@@ -1029,13 +1011,9 @@ namespace Execute
             else
             {
                 // GetDWORDValue call failed or UseLogonCredential not created, let's create it
-                ManagementBaseObject inParamsSet = mc.GetMethodParameters("SetDWORDValue");
-                inParamsSet["hDefKey"] = 0x80000002; // HKEY_LOCAL_MACHINE
-                inParamsSet["sSubKeyName"] = "SYSTEM\\CurrentControlSet\\Control\\SecurityProviders\\WDigest";
-                inParamsSet["sValueName"] = "UseLogonCredential";
-                inParamsSet["uValue"] = 0x00000001;
+                ManagementBaseObject outParamsSet = RegistryMod.SetRegistryWmi("SetDWORDValue", 0x80000002,
+                    "SYSTEM\\CurrentControlSet\\Control\\SecurityProviders\\WDigest", "UseLogonCredential", "1", mc);
 
-                ManagementBaseObject outParamsSet = mc.InvokeMethod("SetDWORDValue", inParamsSet, null);
                 Console.WriteLine(outParamsSet != null && Convert.ToUInt32(outParamsSet["ReturnValue"]) == 0
                     ? "Successfully created and enabled wdigest"
                     : "Error creating and enabling wdigest");
@@ -1132,17 +1110,19 @@ namespace Execute
                 case "reg_create":
                 {
                     GetMethods method = new GetMethods(planter.Commander.RegValType.ToUpper());
-                    SetRegistry(method.RegSetMethod, regRootValues[defKey], regKey, planter.Commander.RegSubKey, planter.Commander.RegVal, mc);
+                    RegistryMod.SetRegistryWmi(method.RegSetMethod, regRootValues[defKey], regKey, planter.Commander.RegSubKey, planter.Commander.RegVal, mc);
                     break;
                 }
                 case "reg_delete":
                 {
                     // Grab the correct type for the registry data entry
-                    pulledRegValType = CheckRegistryType(regRootValues[defKey], regKey, planter.Commander.RegSubKey, mc);
+                    pulledRegValType = RegistryMod.CheckRegistryTypeWmi(regRootValues[defKey], regKey, planter.Commander.RegSubKey, mc);
                     GetMethods method = new GetMethods(pulledRegValType);
 
-                    if (CheckRegistry(method.RegGetMethod, regRootValues[defKey], regKey, planter.Commander.RegSubKey, mc))
-                        DeleteRegistry(regRootValues[defKey], regKey, planter.Commander.RegSubKey, mc);
+                    ManagementBaseObject resultsDel = RegistryMod.CheckRegistryWmi(method.RegGetMethod, regRootValues[defKey], regKey,
+                        planter.Commander.RegSubKey, mc);
+                    if (Convert.ToUInt32(resultsDel["ReturnValue"]) == 0)
+                        RegistryMod.DeleteRegistryWmi(regRootValues[defKey], regKey, planter.Commander.RegSubKey, mc);
                     else
                     {
                         Console.WriteLine("Issue deleting registry value");
@@ -1153,12 +1133,14 @@ namespace Execute
                 }
                 case "reg_mod":
                 {
-                    pulledRegValType = CheckRegistryType(regRootValues[defKey], regKey, planter.Commander.RegSubKey, mc);
+                    pulledRegValType = RegistryMod.CheckRegistryTypeWmi(regRootValues[defKey], regKey, planter.Commander.RegSubKey, mc);
                     GetMethods method = new GetMethods(pulledRegValType);
 
-                    if (CheckRegistry(method.RegGetMethod, regRootValues[defKey], regKey, planter.Commander.RegSubKey, mc))
+                    ManagementBaseObject resultsMod = RegistryMod.CheckRegistryWmi(method.RegGetMethod,
+                        regRootValues[defKey], regKey, planter.Commander.RegSubKey, mc);
+                    if (Convert.ToUInt32(resultsMod["ReturnValue"]) == 0)
                     {
-                        SetRegistry(method.RegSetMethod, regRootValues[defKey], regKey, planter.Commander.RegSubKey, planter.Commander.RegVal, mc);
+                        RegistryMod.SetRegistryWmi(method.RegSetMethod, regRootValues[defKey], regKey, planter.Commander.RegSubKey, planter.Commander.RegVal, mc);
                     }
                     else
                     {
@@ -2000,109 +1982,6 @@ namespace Execute
             }
 
             return true;
-        }
-
-        public bool CheckRegistry(string regMethod, uint defKey, string regSubKey, string regSubKeyValue, ManagementClass mc)
-        {
-            // Block to be used to check the registry for specific values (before modifying or deleting)
-            ManagementBaseObject inParamsSet = mc.GetMethodParameters(regMethod);
-            inParamsSet["hDefKey"] = defKey;
-            inParamsSet["sSubKeyName"] = regSubKey;
-            inParamsSet["sValueName"] = regSubKeyValue;
-
-            ManagementBaseObject outParamsSet = mc.InvokeMethod(regMethod, inParamsSet, null);
-
-            if (outParamsSet != null && Convert.ToUInt32(outParamsSet["ReturnValue"]) == 0)
-                return true;
-            
-            Messenger.ErrorMessage("[-] Registry key not valid, not modifying or deleting");
-            Console.WriteLine("\nFull key provided: " + regSubKey + "\n" + "Value provided: " + regSubKeyValue);
-            return false;
-        }
-
-        public string CheckRegistryType(uint defKey, string regSubKey, string regSubKeyValue, ManagementClass mc)
-        {
-            // Block to be used to check the registry for specific values (before modifying or deleting)
-            const int regSz = 1;
-            const int regExpandSz = 2;
-            const int regBinary = 3;
-            const int regDword = 4;
-            const int regMultiSz = 7;
-
-            // Obtain in-parameters for the method
-            ManagementBaseObject inParams = mc.GetMethodParameters("EnumValues");
-
-            // Add the input parameters.
-            inParams["hDefKey"] = defKey;
-            inParams["sSubKeyName"] = regSubKey;
-
-            // Execute the method and obtain the return values.
-            ManagementBaseObject outParams = mc.InvokeMethod("EnumValues", inParams, null);
-
-            //Hacky way to get the type from the returned arrays
-            int type = ((int[])outParams["Types"])[Array.IndexOf((string[])outParams.Properties["sNames"].Value, regSubKeyValue)];
-
-            switch (type)
-            {
-                case regSz:
-                    return "REG_SZ";
-                case regExpandSz:
-                    return "REG_EXPAND_SZ";
-                case regBinary:
-                    return "REG_BINARY";
-                case regDword:
-                    return "REG_DWORD";
-                case regMultiSz:
-                    return "REG_MULTI_SZ";
-            }
-            return null;
-        }
-
-        public bool SetRegistry(string regMethod, uint defKey, string regSubKey, string regSubKeyValue, string data, ManagementClass mc)
-        {
-            // Block to be used to set the registry for specific values
-            ManagementBaseObject inParamsSet = mc.GetMethodParameters(regMethod);
-            inParamsSet["hDefKey"] = defKey;
-            inParamsSet["sSubKeyName"] = regSubKey;
-            inParamsSet["sValueName"] = regSubKeyValue;
-
-            switch (regMethod)
-            {
-                // Need diff values for different methods
-                case "SetStringValue":
-                    inParamsSet["sValue"] = data;
-                    break;
-                case "SetDWORDValue":
-                    inParamsSet["uValue"] = data;
-                    break;
-            }
-
-            ManagementBaseObject outParamsSet = mc.InvokeMethod(regMethod, inParamsSet, null);
-
-            if (outParamsSet != null && Convert.ToUInt32(outParamsSet["ReturnValue"]) == 0)
-                return true;
-            
-            Messenger.ErrorMessage("[-] Error modifying key");
-            Console.WriteLine("\nFull key provided: " + regSubKey + "\n" + "Value provided: " + regSubKeyValue);
-            return false;
-        }
-
-        public bool DeleteRegistry(uint defKey, string regSubKey, string regSubKeyValue, ManagementClass mc)
-        {
-            // Block to be used to set the registry for specific values
-            ManagementBaseObject inParamsSet = mc.GetMethodParameters("DeleteValue");
-            inParamsSet["hDefKey"] = defKey;
-            inParamsSet["sSubKeyName"] = regSubKey;
-            inParamsSet["sValueName"] = regSubKeyValue;
-
-            ManagementBaseObject outParamsSet = mc.InvokeMethod("DeleteValue", inParamsSet, null);
-
-            if (outParamsSet != null && Convert.ToUInt32(outParamsSet["ReturnValue"]) == 0)
-                return true;
-            
-            Messenger.ErrorMessage("[-] Error deleting key");
-            Console.WriteLine("\nFull key provided: " + regSubKey + "\n" + "Value provided: " + regSubKeyValue);
-            return false;
         }
 
         public void CheckForFinishedDebugFilePath(string originalWmiProperty, ManagementScope scoper)

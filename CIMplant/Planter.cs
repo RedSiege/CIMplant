@@ -11,11 +11,11 @@ namespace CIMplant
 
         public Planter()
         {
-            this.System = Program.Options.Instance.System;
-            this.Domain = Program.Options.Instance.Domain;
-            this.User = Program.Options.Instance.Username;
-            this.Password = CreateSecuredString(Program.Options.Instance.Password);
-            this.NameSpace = Program.Options.Instance.NameSpace;
+            this.System = Commander.Options.Instance.System;
+            this.Domain = Commander.Options.Instance.Domain;
+            this.User = Commander.Options.Instance.Username;
+            this.Password = CreateSecuredString(Commander.Options.Instance.Password);
+            this.NameSpace = Commander.Options.Instance.NameSpace;
         }
 
         public Planter(Commander commander, Connector connector)
