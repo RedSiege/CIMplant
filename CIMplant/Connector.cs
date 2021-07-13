@@ -65,6 +65,7 @@ namespace CIMplant
                 sessionOptions.AddDestinationCredentials(credentials);
                 sessionOptions.MaxEnvelopeSize = 256000; // Not sure how else to get around this
                 connectedCimSession = CimSession.Create(SystemToConn, sessionOptions);
+                
             }
 
             else
@@ -73,9 +74,15 @@ namespace CIMplant
                 connectedCimSession = CimSession.Create(SystemToConn, options);
             }
 
+            //connectedCimSession.TestConnection();
+
             // Test connection to make sure we're connected
-            if (!connectedCimSession.TestConnection())
+            if (!connectedCimSession.TestConnection(out CimInstance instance, out CimException exception))
+            {
                 return null;
+            }
+
+                
 
             Messenger.GoodMessage("[+] Connected\n");
             return connectedCimSession;

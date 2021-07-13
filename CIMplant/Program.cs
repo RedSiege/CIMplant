@@ -198,6 +198,11 @@ namespace CIMplant
             {
                 planter.Connector = new Connector(options.Wmi, planter);
 
+                if (!options.Wmi) //using CIM
+                {
+
+                }
+
                 // We can use && since one will always start as null
                 if (planter.Connector.ConnectedCimSession == null && planter.Connector.ConnectedWmiSession == null)
                 {

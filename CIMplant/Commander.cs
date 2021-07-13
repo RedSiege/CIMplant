@@ -10,7 +10,7 @@ namespace CIMplant
     {
         public string Command, Execute, File, Cmdlet, FileTo, Directory, RegKey, RegSubKey,
             RegVal, RegValType, Service, ServiceBin, Method, Process;
-        public bool Reset;
+        public bool Reset, NoPS;
         
         private readonly string[] _shutdown = { "logoff", "reboot", "restart", "power_off", "shutdown" };
         private readonly string[] _fileCommand = { "cat", "copy", "download", "ls", "search", "upload" };
@@ -38,6 +38,7 @@ namespace CIMplant
             this.Reset = Options.Instance.Reset;
             this.Process = Options.Instance.Process;
             this.Method = null;
+            this.NoPS = Options.Instance.NoPS;
         }
 
         public Commander(string command)
@@ -196,7 +197,7 @@ namespace CIMplant
             "restart", "power_off", "shutdown",
             "vacant_system", "logon_events", "command_exec", "disable_wdigest", "enable_wdigest", "disable_winrm",
             "enable_winrm",
-            "reg_mod", "reg_create", "reg_delete", "remote_posh", "sched_job", "service_mod"
+            "reg_mod", "reg_create", "reg_delete", "remote_posh", "sched_job", "service_mod", "edr_query"
         };
 
         public static void DisplayHelp<T>(ParserResult<T> result, IEnumerable<Error> errs)
@@ -204,7 +205,7 @@ namespace CIMplant
             HelpText helpText = HelpText.AutoBuild(result, h =>
             {
                 h.AdditionalNewLineAfterOption = false;
-                h.Heading = "WMI C# Version 0.1"; //change header
+                h.Heading = "WMI C# Version 0.2"; //change header
                 h.Copyright = ""; //change copyright text
                 h.AutoVersion = false;
                 return HelpText.DefaultParsingErrorsHandler(result, h);
@@ -311,6 +312,10 @@ namespace CIMplant
             [Option("provider", Required = false, HelpText = "Use InstallUtil to register a WMI provider (Not Currently Working)",
                 Default = false)]
             public bool Provider { get; set; }
+           
+            [Option("nops", Required = false, HelpText = "Do not allow any PowerShell execution (will die before)",
+                Default = false)]
+            public bool NoPS { get; set; }
 
             [Option("show-commands", Group = "Command", Required = true,
                 HelpText = "Displays a list of available commands")]
