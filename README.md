@@ -29,9 +29,52 @@ CIMplant.exe -s [remote IP address] -c cat -f c:\users\user\desktop\file.txt
 CIMplant.exe -s [remote IP address] -u [username] -d [domain] -p [password] -c cat -f c:\users\test\desktop\file.txt
 CIMplant.exe -s [remote IP address] -u [username] -d [domain] -p [password] -c command_exec --execute "dir c:\\"
 ```
-### Some Helpful Commands
 
-![image](https://github.com/FortyNorthSecurity/CIMplant/raw/main/Extras/CIMplant-Help.gif)
+## Functions
+
+### File Operations:
+    cat                          -  Reads the contents of a file
+    copy                         -  Copies a file from one location to another
+    download**                   -  Download a file from the targeted machine
+    ls                           -  File/Directory listing of a specific directory
+    search                       -  Search for a file on a user
+    upload**                     -  Upload a file to the targeted machine
+
+### Lateral Movement Facilitation
+    command_exec**               -  Run a command line command and receive the output. Run with nops flag to disable PowerShell
+    disable_wdigest              -  Sets the registry value for UseLogonCredential to zero
+    enable_wdigest               -  Adds registry value UseLogonCredential
+    disable_winrm**              -  Disables WinRM on the targeted system
+    enable_winrm**               -  Enables WinRM on the targeted system
+    reg_mod                      -  Modify the registry on the targeted machine
+    reg_create                   -  Create the registry value on the targeted machine
+    reg_delete                   -  Delete the registry on the targeted machine
+    remote_posh**                -  Run a PowerShell script on a remote machine and receive the output
+    sched_job                    -  Not implimented due to the Win32_ScheduledJobs accessing an outdated API
+    service_mod                  -  Create, delete, or modify system services
+
+#### Process Operations
+    process_kill                 -  Kill a process via name or process id on the targeted machine
+    process_start                -  Start a process on the targeted machine
+    ps                           -  Process listing
+
+### System Operations
+    active_users                 -  List domain users with active processes on the targeted system
+    basic_info                   -  Used to enumerate basic metadata about the targeted system
+    drive_list                   -  List local and network drives
+    ifconfig                     -  Receive IP info from NICs with active network connections
+    installed_programs           -  Receive a list of the installed programs on the targeted machine
+    logoff                       -  Log users off the targeted machine
+    reboot (or restart)          -  Reboot the targeted machine
+    power_off (or shutdown)      -  Power off the targeted machine
+    vacant_system                -  Determine if a user is away from the system
+    edr_query                    -  Query the local or remote system for EDR vendors
+
+### Log Operations
+    logon_events                 -  Identify users that have logged onto a system
+
+    * All PowerShell can be disabled by using the --nops flag, although some commands will not execute (upload/download, enable/disable WinRM)
+    ** Denotes PowerShell usage (either using a PowerShell Runspace or through Win32_Process::Create method)
 
 ### Some Example Usage Commands
 
